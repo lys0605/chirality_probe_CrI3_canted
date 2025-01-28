@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot(x, y, ax=None, title="Custom Plot", xlabel="X-axis", ylabel="Y-axis", color="blue", linestyle="-", linewidth=2, grid=True):
+def plot(x, y, ax=None, linestyle="-", linewidth=2, grid=True, **kwargs):
     """
     Flexible plot function that returns figure and axes objects for further customization. Allows us to plot on an existing axes or create a new figure and axes.
 
@@ -12,10 +12,10 @@ def plot(x, y, ax=None, title="Custom Plot", xlabel="X-axis", ylabel="Y-axis", c
         title (str): Title of the plot.
         xlabel (str): Label for the x-axis.
         ylabel (str): Label for the y-axis.
-        color (str): Color of the line.
         linestyle (str): Style of the line (e.g., '-', '--', ':').
         linewidth (int): Width of the line.
         grid (bool): Whether to display a grid.
+        **kwargs: Additional keyword arguments passed to `ax.plot()`.
 
     Returns:
         fig (matplotlib.figure.Figure): The figure object.
@@ -28,12 +28,7 @@ def plot(x, y, ax=None, title="Custom Plot", xlabel="X-axis", ylabel="Y-axis", c
         fig = ax.figure
     
     # Plot the data
-    ax.plot(x, y, color=color, linestyle=linestyle, linewidth=linewidth)
-    
-    # Add title and labels
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.plot(x, y, linestyle=linestyle, linewidth=linewidth, **kwargs)
     
     # Add grid if enabled
     if grid:
