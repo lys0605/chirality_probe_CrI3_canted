@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from plot_utils import plot, letter_annotation, panel
-from mathfuntion import Im, Re, is_invertible, print_matrix
+from mathfuntion import Im, Re, is_invertible
 import scienceplots
 
 mpl.rcParams['xtick.labelsize'] = 20
@@ -118,7 +118,7 @@ k4 = get_kvectors(K2, Gamma)
 k_vectors = group_kvectors(k0, k1, k2, k3, k4)
 
 s_values = [0.25, 0.5, 0.75]
-D_values = [0, 0.6, 1.2, 1.8]
+D_values = [0, 0.1, 0.2,]
 magnon_bands = [get_band(canted_energy,k_vectors,J=J,D=D,S=S,s=s) for s in s_values for D in D_values]
 
 K2_Gamma = get_path(k0)
@@ -137,8 +137,8 @@ red_colors = ['#ffc883', '#ff9f4d', '#ff6f00', '#c94c00', '#7f2e00'] # red color
 with plt.style.context(['science']):
     fig, ax = plt.subplots(figsize=(8,4))
     for i in range(len(D_values)):
-        plot(np.arange(len(path)), magnon_bands[i][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=r"$B=0.25B_s$"+rf"$D={D_values[i]}$")
-        plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
+        plot(np.arange(len(path)), magnon_bands[i+2*len(D_values)][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=r"$B=0.75B_s$"+rf"$D={D_values[i]}$")
+        plot(np.arange(len(path)), magnon_bands[i+2*len(D_values)][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
 
     for i in range(len(k_index)-2):  
         ax.axvline(k_index[i+1], color="black", ls = '-' ,linewidth=1.0)
@@ -152,4 +152,4 @@ with plt.style.context(['science']):
     ax.set_ylabel(r"$\epsilon$ $\mathrm{(meV)}$")
     fig.tight_layout()
     plt.show()
-fig.savefig('canted_energy_bands_B=0.25.png', dpi=600 ,bbox_inches='tight')
+fig.savefig('figures/canted_energy_bands/canted_energy_bands_B=0.75.png', dpi=600 ,bbox_inches='tight')

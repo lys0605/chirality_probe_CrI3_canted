@@ -42,7 +42,7 @@ def letter_annotation(ax, xoffset, yoffset, letter,size=12):
 
 def panel(figsize=(8,6), nrowcols=2, nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1, 1], hspace=0, wspace=0):
     """
-    Creating a panel of subplots with equal aspect ratio and no space between subplots. Plotting images in a 2x2 panel.
+    Creating a panel of subplots with equal aspect ratio and no space between subplots.
 
     Parameters:
         figsize (tuple): Figure size.
@@ -60,7 +60,7 @@ def panel(figsize=(8,6), nrowcols=2, nrows=2, ncols=2, width_ratios=[1, 1], heig
     fig = plt.figure(figsize=figsize, constrained_layout=True)
     gs = fig.add_gridspec(nrows=nrows, ncols=ncols, hspace=hspace, wspace=wspace, width_ratios=width_ratios, height_ratios=height_ratios)
     axes = gs.subplots()
-    for ax in axes:
-        ax.set_box_aspect(1)
-        ax.set_axis_off()
+    # for ax in axes:
+    #     ax.set_box_aspect(1)
+    #     ax.set_axis_off()
     return fig, axes
