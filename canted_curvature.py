@@ -1,9 +1,11 @@
+# %%
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from plot_utils import plot, letter_annotation, panel
 from mathfuntion import Im, Re, is_invertible
 import scienceplots
+# %%
 
 def bzmesh(n=200,m=2):
     '''
@@ -350,22 +352,31 @@ kx,ky = bzmesh(m=2)
 
 # %%
 color_bar_title = [r"$\Omega_{+}$",r"$\Omega_{-}$"]
+color_bar_title_FM = [r"$\Omega_{+}^{\text{FM}}$",r"$\Omega_{-}{\text{FM}}$"]
 pads = [0, 7]
 with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(8,3),nrows=1,ncols=2,width_ratios=[1,1],height_ratios=[1],hspace=0.1,wspace=0.1)
-    fig.subplots_adjust(top=0.95,bottom=0.15,right=0.99)
+    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.1)
+
+    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, berry_curvatures[1][-1+i], cmap="jet")
+        pc = axes[i].pcolormesh(kx, ky, berry_curvatures[20][i], cmap="jet")
+        
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
+
         clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
         clb.ax.set_title(color_bar_title[i], loc='left', fontsize=16, pad=pads[i])
         clb.ax.tick_params(labelsize=16)
-        axes[i].set_xticks([-0.5*2*np.pi,0,0.5*2*np.pi])
-        axes[i].set_xticklabels(['-1','0','1'], fontsize=16)
-        axes[i].set_yticks([-0.5*2*np.pi,0,0.5*2*np.pi])
-        axes[i].set_yticklabels(['-1','0','1'], fontsize=16)
+
+        axes[i].set_axis_on() # make sure the axis is on
+        axes[i].grid(False) # make sure the grid is off
+
+        axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
+        axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
+
         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
-    plt.tight_layout()
     plt.show()
 # %%

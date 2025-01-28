@@ -57,7 +57,7 @@ def panel(figsize=(8,6), nrowcols=2, nrows=2, ncols=2, width_ratios=[1, 1], heig
         fig (matplotlib.figure.Figure): The figure object.
         axes (np.ndarray): Array of axes objects.
     """
-    fig = plt.figure(figsize=figsize, constrained_layout=True)
+    fig = plt.figure(figsize=figsize)
     gs = fig.add_gridspec(nrows=nrows, ncols=ncols, hspace=hspace, wspace=wspace, width_ratios=width_ratios, height_ratios=height_ratios)
     axes = gs.subplots()
     # for ax in axes:
