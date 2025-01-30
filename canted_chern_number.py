@@ -6,85 +6,30 @@ from plot_utils import plot, letter_annotation, panel
 from mathfuntion import Im, Re, is_invertible
 from honeycomb_lattice import *
 import scienceplots
+import matplotlib.path as mpath
+import matplotlib.patches as mpatches
+Path = mpath.Path
 # %%
 
-
-def canted_eigs_exact(k,J=1.54,D=0.1,S=5/2,s=0.6):
-    '''
-    obtain a the eigenvectors of tauz@matrix H_k for a given k
-    energy in meV 
-    k: reciprocal vectors
-    J: exchange interaction coefficient
-    D: DMI coefficient
-    S: spin number
-    s: saturation field ratio (sin\theta)
-    '''
-    Bs = 6*J*S
-    B = s*Bs
-    
-    # parameters
-    M = 6*J*S
-    v = s**2
-    
-    # lattice structure
-#     a = 6.324 # 6.324 Å
-    n_n = np.sqrt(3)*np.array([[0,1/np.sqrt(3)],[-1/2,-0.5/np.sqrt(3)],[1/2,-0.5/np.sqrt(3)]])
-    next_n_n = -np.sqrt(3)*np.array([[1/2,np.sqrt(3)/2],[-1,0],[1/2,-np.sqrt(3)/2]]) # next nearest neighbour vectors
-    
-    # vectorizing function
-    dot = np.vectorize(np.dot,signature='(n),(m)->()')
-    gamma = np.sum(np.exp(-1j*k@n_n.T))
-    gamma_sin = np.sum(np.sin(k@next_n_n.T))
-    
-    # complex parameters
-    phi_k = 2*J*S*gamma
-    lambda_k = 4*D*S*s*gamma_sin
-    phi_bar_k = np.conjugate(phi_k) 
-    aphi_k = np.abs(phi_k)**2
-    delta_k = np.sqrt(lambda_k**2+v**2*aphi_k)
- 
-    # energy band -,+
-    Em = M-delta_k
-    Ep = M+delta_k
-    rho_k = (1-v)*np.abs(phi_k)
-    em = np.emath.sqrt(Em**2-rho_k**2)
-    ep = np.emath.sqrt(Ep**2-rho_k**2)
-    
-    # subspace parameters  
-    cosh1 = np.emath.sqrt((Ep+ep)/(2*ep))
-    sinh1 = np.emath.sqrt((Ep-ep)/(2*ep))
-    cosh2 = np.emath.sqrt((Em+em)/(2*em))
-    sinh2 = -np.emath.sqrt((Em-em)/(2*em))
-    
-    cos = np.emath.sqrt((delta_k+lambda_k)/(2*delta_k))
-    sin = np.emath.sqrt((delta_k-lambda_k)/(2*delta_k))
-    
-    # angles
-    varphi_k = 1j*np.log(phi_k/np.abs(phi_k))
-    chi1_k = np.arcsinh(sinh1)
-    chi2_k = np.arcsinh(sinh2)
-    psi_k = np.arcsin(sin)
-    
-    phase = np.exp(1j*Re(varphi_k)/2)
-    phase_conj = np.conj(phase)
-    
-    
-    # eigenvectors
-    tau_x = np.array([[0,0,1,0],[0,0,0,1],[1,0,0,0],[0,1,0,0]])
-    u1 = np.array([-cosh1*cos*phase, cosh1*sin*phase_conj, -sinh1*sin*phase, sinh1*cos*phase_conj])
-    u2 = np.array([cosh2*sin*phase, cosh2*cos*phase_conj, sinh2*cos*phase, sinh2*sin*phase_conj])
-    u3 = np.array([-sinh1*cos*phase, sinh1*sin*phase_conj, -cosh1*sin*phase, cosh1*cos*phase_conj])
-    u4 = np.array([sinh2*sin*phase, sinh2*cos*phase_conj, cosh2*cos*phase, cosh2*sin*phase_conj])
-    
-    Uk = np.array([u1,u2,u3,u4])
-    E = np.array([ep,em,-ep,-em])
-    
-#     norm = np.abs(u1[0])**2+np.abs(u1[1])**2-np.abs(u1[2])**2-np.abs(u1[3])**2
-    return E,Uk
-
-def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
+def get_chern_number(J=1, D=0.1, S=5/2, B0=0.5):
     """
-    get Berry curvature in k-sapce
+    Calculate the canted Chern number for a canted antiferromagnet on a honeycomb lattice.
+
+    Parameters:
+        J (float): Heisenberg exchange interaction in mev
+        D (float): DM interaction in meV
+        S (float): Spin number
+        B0 (float): Saturation field ratio (sin\theta)
+
+    Returns:
+        p_13 (np.array): Two magnon pair creation (same modes but opposite momentum) for upper band
+        p_24 (np.array): Two magnon pair creation (same modes but opposite momentum) for lower band
+
+        p_12 (np.array): FM process (interband) for upper band
+        p_34 (np.array): FM process (interband) for lower band
+
+        p_14 (np.array): AFM process (pair creation with different modes) for upper band
+        p_23 (np.array): AFM process (pair creation with different modes) for lower band
     """
     # field
     Bs = 3*J*S # not 6JS here
@@ -215,13 +160,15 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
             p_14[i,j] = a**2*nu*cosDouble*(p_14_1+p_14_2)+rho*sigma_k
             
             # berry curvature
-            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+0*2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
-            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-0*2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
+            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
+            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
             
         if i%50 == 0:
                 print(f'{i}, B={B0:.2f}, D={D:.3f}: done')
-    berry_rcd_array = np.array([berry_rcd_p,berry_rcd_m])
-    return berry_rcd_array
+    chern_p = bz_integration_honeycomb(berry_rcd_p,n=200,m=2)/(2*np.pi)
+    chern_m = bz_integration_honeycomb(berry_rcd_p,n=200,m=2)/(2*np.pi)
+    Cherns = np.array([chern_p, chern_m])
+    return Cherns
 
 J = 1 # meV
 D = 0.1 # D/J = 0.1
@@ -232,43 +179,5 @@ s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 s_values = [0.25, 0.5, 0.75, 1]
 D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
 
-berry_curvatures = [get_berry_curvature_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
-# %%
-honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
-
-kx,ky = bzmesh(m=2)
-
-# %% ploting 
-color_bar_title = [r"$\Omega_{+}$",r"$\Omega_{-}$"]
-color_bar_title_RCD = [r"$\Omega_{+}^{\text{RCD}}$",r"$\Omega_{-}^{\text{RCD}}$"]
-color_bar_title_FM = [r"$\Omega_{+}^{\text{FM}}$",r"$\Omega_{-}^{\text{FM}}$"]
-color_bar_title_noFM = [r"$\Omega_{+}^{\text{noFM}}$",r"$\Omega_{-}^{\text{noFM}}$"]
-color_bar_title_rest = [r"$\Omega_{+}^{\text{Rest}}$",r"$\Omega_{-}^{\text{Rest}}$"]
-
-pads = [0, 7]
-with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.25)
-
-    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
-
-    for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, berry_curvatures[9][i], cmap="jet")
-        
-        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
-
-        clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(color_bar_title_RCD[i], loc='left', fontsize=16, pad=pads[i])
-        clb.ax.tick_params(labelsize=16)
-
-        axes[i].set_axis_on() # make sure the axis is on
-        axes[i].grid(False) # make sure the grid is off
-
-        axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
-        axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
-
-        axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-        axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
-    plt.show()
-# %%
+Cherns = 
+print(Cherns)
