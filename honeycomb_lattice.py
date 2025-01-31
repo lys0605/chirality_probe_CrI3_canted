@@ -3,10 +3,35 @@ import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 Path = mpath.Path
 
+def get_reciprocal_vectors(a:np.ndarray, d=2):
+    """
+    Compute the reciprocal lattice vectors.
+
+     Parameters:
+        a (np.ndarray): The lattice vectors.
+        d (int): The dimension of the lattice.
+
+    Returns:
+        B (np.ndarray): The reciprocal lattice vectors.
+    """
+    if d == 2:
+        A = np.array([a[0],a[1]]).T
+    else:
+        A = np.array([a[0],a[1],a[2]]).T
+    B = 2*np.pi*LA.inv(A)
+    return B
+
 def bzmesh(n=200,m=2):
     '''
-    Create BZ meshgrid
-    m = 2 for standard BZ of square lattice [-pi,pi]x[-pi,pi] =(2pi)^2  
+    Create a meshgrid of k-points in the first Brillouin zone.
+
+     Parameters:
+        n (int): Number of points in each direction.
+        m (int): Number of times the BZ is repeated in each direction.
+
+    Returns:
+        kx (np.ndarray): The x-coordinates of the meshgrid.
+        ky (np.ndarray): The y-coordinates of the meshgrid.
     '''
     x = np.linspace(-0.5*m*np.pi,0.5*m*np.pi,2*n+1)
     y = np.linspace(-0.5*m*np.pi,0.5*m*np.pi,2*n+1)
@@ -16,13 +41,20 @@ def bzmesh(n=200,m=2):
 # need to change later, not a standard way to get honeycom lattice BZ
 def honeycomb_bz():
     """
-        return corners of the honeycomb lattice BZ
+     Parameters:
+        None
+
+    Returns:
+        honeycomb_bz_x (np.ndarray): The x-coordinates of the honeycomb BZ.
+        honeycomb_bz_y (np.ndarray): The y-coordinates of the honeycomb BZ.
     """
     honeycomb_bz_x = 2/3*2*np.pi*np.array([-1/np.sqrt(3),-0.5/np.sqrt(3),0.5/np.sqrt(3),1/np.sqrt(3),0.5/np.sqrt(3),-0.5/np.sqrt(3),-1/np.sqrt(3)])
     honeycomb_bz_y = 2/3*2*np.pi*np.array([0,1/2,1/2,0,-1/2,-1/2,0])
     return honeycomb_bz_x,honeycomb_bz_y
 
 def get_symmetry_pts_index_honeycomb(m=2):
+    """
+    """
     # symmetry points
     honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
     # non repeated symmetry points
@@ -64,16 +96,31 @@ def points_in_bz():
 ]
     path = Path(verts, codes, closed=True)
     
-def rotation2D(point, theta):
+def rotation2D(point:np.ndarray, theta:float):
     '''
-    anticlockwise rotation with angle = theta, in radian
+    Rotate a point in 2D space.
+
+    Parameters:
+        point (np.ndarray): The point to rotate.
+        theta (float): The angle of rotation.
+
+    Returns:
+        R@point (np.ndarray): The rotated point.
     '''
     R = np.array([[np.cos(theta), -np.sin(theta)],[np.sin(theta), np.cos(theta)]])
     return R@point
 
 def bz_integration_honeycomb(f_matrix,n=200,m=1):
     '''
-    surface integration on honeycomb BZ
+    Integrate a function over the first Brillouin zone of a honeycomb lattice.
+    
+    Parameters:
+        f_matrix (np.ndarray): The values of function on lattice to integrate.
+        n (int): Number of points in each direction
+        m (int): Number of times the BZ is repeated in each direction
+
+    Returns:
+        np.sum(f_matrix_in_bz)*dk*dk (float): The integral of the function over the BZ.
     '''
     # spacing
     kx, ky = np.meshgrid(np.linspace(-m*np.pi, m*np.pi, 2*n+1),np.linspace(-m*np.pi, m*np.pi, 2*n+1)) # m = 1 -> 1st; 2nd; etc
