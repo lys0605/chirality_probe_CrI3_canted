@@ -6,6 +6,9 @@ from plot_utils import plot, letter_annotation, panel
 from mathfuntion import Im, Re, is_invertible
 from honeycomb_lattice import *
 import scienceplots
+import matplotlib.path as mpath
+import matplotlib.patches as mpatches
+Path = mpath.Path
 # %%
 
 
@@ -252,7 +255,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, berry_curvatures[9][i], cmap="jet")
+        pc = axes[i].pcolormesh(kx, ky, berry_curvatures[19][i], cmap="jet")
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
@@ -271,4 +274,7 @@ with plt.style.context(['science','ieee']):
         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
+# %%
+
+bz_integration_honeycomb(berry_curvatures[9][0]-berry_curvatures[2][0])/(2*np.pi)
 # %%

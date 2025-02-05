@@ -117,8 +117,11 @@ k3 = get_kvectors(M, K2, num=51)
 k4 = get_kvectors(K2, Gamma)
 k_vectors = group_kvectors(k0, k1, k2, k3, k4)
 
-s_values = [0, 0.25, 0.5, 0.75, 1]
-magnon_bands = [get_band(canted_energy,k_vectors,J=J,D=0.1*s,S=S,s=s) for s in s_values]
+#%%
+s_values = [0.25, 0.5, 0.75, 1]
+D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
+magnon_bands = [get_band(canted_energy,k_vectors,J=J,D=D,S=S,s=s) for s in s_values for D in D_values]
+#%%
 
 K2_Gamma = get_path(k0)
 Gamma_K1 = get_path(k1)[1:]
@@ -133,11 +136,12 @@ path, k_index = get_total_path(K2_Gamma,Gamma_K1,K1_M,M_K2,K2_Gamma_2)
 blue_colors = ['#8fd0ff', '#589fef', '#0071bc', '#00468b', '#00215d'] # blue colors for the bands from light to dark
 red_colors = ['#ffc883', '#ff9f4d', '#ff6f00', '#c94c00', '#7f2e00'] # red colors for the bands from light to dark
 
+#%%
 with plt.style.context(['science']):
     fig, ax = plt.subplots(figsize=(8,4))
-    for i in range(len(s_values)):
-        plot(np.arange(len(path)), magnon_bands[i][1]-magnon_bands[i][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=rf"$s={s_values[i]}$, "+rf"$d={s_values[i]*0.1}$")
-        #plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
+    for i in range(len(D_values)):
+        plot(np.arange(len(path)), magnon_bands[i+5*2][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=rf"$s={s_values[2]}$, "+rf"$d={D_values[i]}$")
+        plot(np.arange(len(path)), magnon_bands[i+5*2][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
 
     for i in range(len(k_index)-2):  
         ax.axvline(k_index[i+1], color="black", ls = '-' ,linewidth=1.0)
@@ -152,3 +156,4 @@ with plt.style.context(['science']):
     fig.tight_layout()
     plt.show()
 #fig.savefig('figures/canted_energy_bands/canted_energy_bands_B=0.75.png', dpi=600 ,bbox_inches='tight')
+# %%

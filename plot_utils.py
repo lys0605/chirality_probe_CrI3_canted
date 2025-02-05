@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot(x, y, ax=None, linestyle="-", linewidth=2, grid=True, **kwargs):
+def plot(x, y, ax=None, linestyle="-", linewidth=2, **kwargs):
     """
     Flexible plot function that returns figure and axes objects for further customization. Allows us to plot on an existing axes or create a new figure and axes.
 
@@ -31,8 +31,8 @@ def plot(x, y, ax=None, linestyle="-", linewidth=2, grid=True, **kwargs):
     ax.plot(x, y, linestyle=linestyle, linewidth=linewidth, **kwargs)
     
     # Add grid if enabled
-    if grid:
-        ax.grid(True)
+    # if grid:
+    #     ax.grid(True)
     
     # Return the figure and axes for further customization
     return fig, ax

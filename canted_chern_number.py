@@ -11,9 +11,9 @@ import matplotlib.patches as mpatches
 Path = mpath.Path
 # %%
 
-def get_chern_number(J=1, D=0.1, S=5/2, B0=0.5):
+def get_berry_curvature(J=1, D=0.1, S=5/2, B0=0.5):
     """
-    Calculate the canted Chern number for a canted antiferromagnet on a honeycomb lattice.
+    Calculate the berry curvature for a canted antiferromagnet on a honeycomb lattice.
 
     Parameters:
         J (float): Heisenberg exchange interaction in mev
@@ -22,14 +22,7 @@ def get_chern_number(J=1, D=0.1, S=5/2, B0=0.5):
         B0 (float): Saturation field ratio (sin\theta)
 
     Returns:
-        p_13 (np.array): Two magnon pair creation (same modes but opposite momentum) for upper band
-        p_24 (np.array): Two magnon pair creation (same modes but opposite momentum) for lower band
-
-        p_12 (np.array): FM process (interband) for upper band
-        p_34 (np.array): FM process (interband) for lower band
-
-        p_14 (np.array): AFM process (pair creation with different modes) for upper band
-        p_23 (np.array): AFM process (pair creation with different modes) for lower band
+        Cherns (np.ndarray): The Chern number for the two bands.
     """
     # field
     Bs = 3*J*S # not 6JS here
@@ -164,9 +157,26 @@ def get_chern_number(J=1, D=0.1, S=5/2, B0=0.5):
             berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
             
         if i%50 == 0:
-                print(f'{i}, B={B0:.2f}, D={D:.3f}: done')
-    chern_p = bz_integration_honeycomb(berry_rcd_p,n=200,m=2)/(2*np.pi)
-    chern_m = bz_integration_honeycomb(berry_rcd_p,n=200,m=2)/(2*np.pi)
+                print(f'Iteration {i}: B={B0:.2f}, D={D:.3f}: done')
+    
+    return berry_rcd_p, berry_rcd_m
+
+def get_chern_number(J=1, D=0.1, S=5/2, B0=0.5, n=200, m=1):
+    """
+    Calculate the canted Chern number for a canted antiferromagnet on a honeycomb lattice.
+    
+    Parameters:
+        J (float): Heisenberg exchange interaction in mev
+        D (float): DM interaction in meV
+        S (float): Spin number
+        B0 (float): Saturation field ratio (sin\theta)
+
+    Returns:
+        Cherns (np.ndarray): The Chern number for the two bands.
+    """
+    berry_p, berry_m = get_berry_curvature(J=J, D=D, S=S, B0=B0)
+    chern_p = bz_integration_honeycomb(berry_p, n=n, m=m)/(2*np.pi)
+    chern_m = bz_integration_honeycomb(berry_m, n=n, m=m)/(2*np.pi)
     Cherns = np.array([chern_p, chern_m])
     return Cherns
 
@@ -176,8 +186,55 @@ S = 5/2 # spin number
 s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
-s_values = [0.25, 0.5, 0.75, 1]
-D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
+s_values = np.array([0.25, 0.5, 0.75, 1])
+D_values = np.array([0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3])
 
-Cherns = 
-print(Cherns)
+C_p = np.zeros((s_values.size, D_values.size))
+C_m = np.zeros((s_values.size, D_values.size))
+
+for i in range(s_values.size):
+    for j in range(D_values.size):
+        C_p[i,j], C_m[i,j] = get_chern_number(J=J, D=D_values[j], S=S, B0=s_values[i])
+       
+Cherns = np.array([C_p, C_m])
+# %%
+
+# %% plot
+
+mpl.rcParams['xtick.labelsize'] = 32
+mpl.rcParams['ytick.labelsize'] = 32
+mpl.rcParams['axes.labelsize'] = 30
+
+color_bar_title = [r"$C_{+}$",r"$C_{-}$"]
+color_bar_title_RCD = [r"$C_{+}^{\text{RCD}}$",r"$C_{-}^{\text{RCD}}$"]
+color_bar_title_FM = [r"$C_{+}^{\text{FM}}$",r"$C_{-}^{\text{FM}}$"]
+color_bar_title_noFM = [r"$C_{+}^{\text{noFM}}$",r"$C_{-}^{\text{noFM}}$"]
+color_bar_title_rest = [r"$C_{+}^{\text{Rest}}$",r"$C_{-}^{\text{Rest}}$"]
+pads = [0, 15]
+
+with plt.style.context(['ieee']):
+    px,py = np.meshgrid(D_values, s_values)
+    
+    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.25)
+
+    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
+   for i in range(2):
+        pc = axes[i].pcolormesh(kx, ky, Cherns[i], cmap="jet")
+
+        clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
+        clb.ax.set_title(color_bar_title_RCD[i], loc='left', fontsize=34, pad=pads[i])
+        clb.ax.tick_params(labelsize=16)
+
+        axes[i].set_axis_on() # make sure the axis is on
+        axes[i].grid(False) # make sure the grid is off
+
+        axes[i].set_xticks([0.1, 0.15, 0.2, 0.25, 0.3])
+        axes[i].set_xticklabels([r'$0.1$',r'$0.15$',r'$0.2$',r'$0.25$',r'$0.3$'])
+
+        axes[i].set_xlabel(r'$D/J$', fontsize=34)
+        axes[i].set_ylabel(r'$B/B_s$', fontsize=34)
+    plt.show()
+
+# %% savefig
+# fig.savefig('figures/chern_numbers/canted_chern_number.pdf', bbox_inches='tight')
