@@ -40,7 +40,7 @@ def plot(x, y, ax=None, linestyle="-", linewidth=2, **kwargs):
 def letter_annotation(ax, xoffset, yoffset, letter,size=12):
     ax.text(xoffset, yoffset, letter, transform=ax.transAxes, size=size)
 
-def panel(figsize=(8,6), nrowcols=2, nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1, 1], hspace=0, wspace=0):
+def panel(figsize=(8,6), nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1, 1], hspace=0, wspace=0):
     """
     Creating a panel of subplots with equal aspect ratio and no space between subplots.
 

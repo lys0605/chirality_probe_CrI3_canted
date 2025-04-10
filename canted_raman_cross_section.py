@@ -75,7 +75,7 @@ def raman_cross_section_ham(k,qq=0,J=1,D=0.1,S=5/2,B0=0.5):
     
     # parameters
     M = 3*J*S
-    v = s**2
+    v = s**2    
     
     # lattice parameters
     a = 1
@@ -282,7 +282,7 @@ def get_raman_cross_section(qq=0, J=1, D=0.1, S=5/2, B0=0.5):
 
 J = 1 # meV
 D = 0.1 # D/J = 0.1
-S = 5/2 # spin number
+S = 5 # spin number
 s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 
 # %% RL
@@ -312,7 +312,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(3):
-        pc = axes[i].pcolormesh(kx, ky, raman_cross_sections_RL[5][2*i]-raman_cross_sections_LR[5][2*i], cmap="jet")
+        pc = axes[i].pcolormesh(kx, ky, raman_cross_sections_RL[3*5+4][2*i], cmap="jet")
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
@@ -332,4 +332,265 @@ with plt.style.context(['science','ieee']):
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
 # %%
+# %%
+def get_raman_cross_section_exact(J=1,D=0.1,S=5/2,B0=0.5, f=1):
+    '''
+    Compute the Raman cross section for a given set of parameters.
 
+    Parameters:
+        J (float): Heisenberg exchange interaction in meV
+        D (float): DM interaction in meV
+        S (float): Spin number
+        B0 (float): Saturation field ratio (sin\theta)
+        f (int): turn on fk (1) or off (0)
+
+    Returns:
+        p_13 (np.array): Two magnon pair creation (same modes but opposite momentum) for upper band
+        p_24 (np.array): Two magnon pair creation (same modes but opposite momentum) for lower band
+        p_12 (np.array): FM process (interband) for upper band
+        p_34 (np.array): FM process (interband) for lower band
+        p_14 (np.array): AFM process (pair creation with different modes) for upper band
+        p_23 (np.array): AFM process (pair creation with different modes) for lower band
+    '''
+    # field
+    Bs = 3*J*S # not 6JS here
+    B = (B0-0.001)*Bs
+    s = B/Bs
+    
+    # parameters
+    M = 3*J*S
+    v = s**2
+    
+    # lattice parameters
+    a = 1
+    n_n = a*np.sqrt(3)*np.array([[0,1/np.sqrt(3)],[1/2,-0.5/np.sqrt(3)],[-1/2,-0.5/np.sqrt(3)]]) #a1,a2,a3
+    next_n_n = -a*np.sqrt(3)*np.array([[-1,0],[1/2,np.sqrt(3)/2],[1/2,-np.sqrt(3)/2]]) # b1,b2,b3
+    
+    no_n_n = n_n.shape[0]
+    no_next_n_n = next_n_n.shape[0]
+    
+    x_n_n = np.array([1,0])@n_n.T
+    y_n_n = np.array([0,1])@n_n.T
+    xy_n_n = np.outer(x_n_n,y_n_n)
+    diff_n_n = np.array((n_n[0]-n_n,n_n[1]-n_n,n_n[2]-n_n)) # a_i-a_j
+    x_next_n_n = np.array([1,0])@next_n_n.T
+    y_next_n_n = np.array([0,1])@next_n_n.T
+    
+    n_n_xy_diff = x_n_n**2-y_n_n**2
+    n_n_xy_prod = x_n_n*y_n_n
+    next_n_n_xy_diff = x_next_n_n**2-y_next_n_n**2
+    next_n_n_xy_prod = x_next_n_n*y_next_n_n
+    
+    next_xy_nn = np.outer(x_next_n_n,y_n_n)-np.outer(y_next_n_n,x_n_n)
+    
+    # vectorizing function
+    dot = np.vectorize(np.dot,signature='(n),(m)->()')
+    
+    # chirality and polarisation
+    zeta = 1 # +1: right; -1:left
+    # right circularly polarized: (-i,1)/sqrt(2); left circularly polarized: (i,1)/sqrt(2)
+    # e_in_1 -> (e_in_R)^*; e_in_2 -> (e_in_L)^*;
+    # e_out_1 -> (e_out_L); e_out_2 -> (e_out_R)
+    e_in_1 = (1/np.sqrt(2))*np.array([-1j*zeta,1])
+    e_in_2 = (1/np.sqrt(2))*np.array([1j*zeta,1])
+    e_out_1 = (1/np.sqrt(2))*np.array([-1j*zeta,1])
+    e_out_2 = (1/np.sqrt(2))*np.array([1j*zeta,1])
+    
+    # calculate
+    kx,ky = bzmesh(m=2)
+     
+    # two-magnon pair creation (same modes but opposite momentum), FM, AFM
+    p_13 = np.zeros(kx.shape)
+    p_24 = np.zeros(kx.shape)
+    p_12 = np.zeros(kx.shape)
+    p_14 = np.zeros(kx.shape)
+    energy_lower = np.zeros(kx.shape)
+    energy_upper = np.zeros(kx.shape)
+    berry_p = np.zeros(kx.shape)
+    berry_m = np.zeros(kx.shape)
+    berry_rcd_p = np.zeros(kx.shape)
+    berry_rcd_m = np.zeros(kx.shape)
+    
+    kx = kx[0]
+    ky = ky.T[0]
+    for i in range(ky.size):
+        for j in range(kx.size):
+            k = np.vstack((kx[j],ky[i])).T
+            k = k.reshape(k.shape[1])
+            
+            gamma = np.sum(np.exp(-1j*k@n_n.T))
+            gamma_sin = np.sum(np.sin(k@next_n_n.T))
+            
+            # complex parameters
+            phi_k = J*S*gamma
+            phi_bar_k = np.conjugate(phi_k) 
+            aphi_k = np.abs(phi_k)**2
+            lambda_k = 2*D*S*s*gamma_sin
+            delta_k = np.sqrt(lambda_k**2+v**2*aphi_k)
+            # energy band -,+
+            Em = M-delta_k
+            Ep = M+delta_k
+            rho_k = (1-v)*np.abs(phi_k)
+            em = np.emath.sqrt(Em**2-rho_k**2)
+            ep = np.emath.sqrt(Ep**2-rho_k**2)
+            energy_lower[i,j] = em
+            energy_upper[i,j] = ep
+
+            # subspace parameters  
+            cosh1 = np.emath.sqrt((Ep+ep)/(2*ep))
+            sinh1 = np.emath.sqrt((Ep-ep)/(2*ep))
+            cosh2 = np.emath.sqrt((Em+em)/(2*em))
+            sinh2 = -np.emath.sqrt((Em-em)/(2*em))
+            sinh1Double = 2*sinh1*cosh1
+            cosh1Double = sinh1**2+cosh1**2
+            sinh2Double = 2*sinh2*cosh2
+            cosh2Double = sinh2**2+cosh2**2
+            sinh_12_p = sinh1*cosh2+sinh2*cosh1
+            sinh_12_m = sinh1*cosh2-sinh2*cosh1
+            cosh_12_p = cosh1*cosh2+sinh1*sinh2
+            cosh_12_m = cosh1*cosh2-sinh2*sinh1
+
+            cos = np.emath.sqrt((delta_k+lambda_k)/(2*delta_k))
+            sin = np.emath.sqrt((delta_k-lambda_k)/(2*delta_k))
+            sinDouble = 2*sin*cos
+            cosDouble = cos**2-sin**2
+            
+            phase = 1j*np.log(phi_k/np.abs(phi_k))
+            
+            # LR
+            g_11_1 = e_in_1@n_n[0]*e_out_1@n_n[0]
+            g_11_2 = e_in_1@n_n[1]*e_out_1@n_n[1]
+            g_11_3 = e_in_1@n_n[2]*e_out_1@n_n[2]
+            gk_11 = J*S*(g_11_1*np.exp(-1j*k@n_n[0])+g_11_2*np.exp(-1j*k@n_n[1])+g_11_3*np.exp(-1j*k@n_n[2]))
+            gkb_11 = J*S*(g_11_1*np.exp(1j*k@n_n[0])+g_11_2*np.exp(1j*k@n_n[1])+g_11_3*np.exp(1j*k@n_n[2]))
+            g0_11 = J*S*(g_11_1+g_11_2+g_11_3)
+
+            # LL
+            g_12_1 = e_in_1@n_n[0]*e_out_2@n_n[0]
+            g_12_2 = e_in_1@n_n[1]*e_out_2@n_n[1]
+            g_12_3 = e_in_1@n_n[2]*e_out_2@n_n[2]
+            gk_12 = J*S*(g_12_1*np.exp(-1j*k@n_n[0])+g_12_2*np.exp(-1j*k@n_n[1])+g_12_3*np.exp(-1j*k@n_n[2]))
+            gkb_12 = J*S*(g_12_1*np.exp(1j*k@n_n[0])+g_12_2*np.exp(1j*k@n_n[1])+g_12_3*np.exp(1j*k@n_n[2]))
+            g0_12 = J*S*(g_12_1+g_12_2+g_12_3)
+
+            # RR
+            g_21_1 = e_in_2@n_n[0]*e_out_1@n_n[0]
+            g_21_2 = e_in_2@n_n[1]*e_out_1@n_n[1]
+            g_21_3 = e_in_2@n_n[2]*e_out_1@n_n[2]
+            gk_21 = J*S*(g_21_1*np.exp(-1j*k@n_n[0])+g_21_2*np.exp(-1j*k@n_n[1])+g_21_3*np.exp(-1j*k@n_n[2]))
+            gkb_21 = J*S*(g_21_1*np.exp(1j*k@n_n[0])+g_21_2*np.exp(1j*k@n_n[1])+g_21_3*np.exp(1j*k@n_n[2]))
+            g0_21 = J*S*(g_21_1+g_21_2+g_21_3)
+
+            # RL
+            g_22_1 = e_in_2@n_n[0]*e_out_2@n_n[0]
+            g_22_2 = e_in_2@n_n[1]*e_out_2@n_n[1]
+            g_22_3 = e_in_2@n_n[2]*e_out_2@n_n[2]
+            gk_22 = J*S*(g_22_1*np.exp(-1j*k@n_n[0])+g_22_2*np.exp(-1j*k@n_n[1])+g_22_3*np.exp(-1j*k@n_n[2]))
+            gkb_22 = J*S*(g_22_1*np.exp(1j*k@n_n[0])+g_22_2*np.exp(1j*k@n_n[1])+g_22_3*np.exp(1j*k@n_n[2]))
+            g0_22 = J*S*(g_22_1+g_22_2+g_22_3)
+
+            # f-factor
+            # LR
+            f_11_1 = e_in_1@next_n_n[0]*e_out_1@next_n_n[0]
+            f_11_2 = e_in_1@next_n_n[1]*e_out_1@next_n_n[1]
+            f_11_3 = e_in_1@next_n_n[2]*e_out_1@next_n_n[2]
+            #fk_11 = 1j*2*D*S*(f_11_1*np.exp(-1j*k@next_n_n[0])+f_11_2*np.exp(-1j*k@next_n_n[1])+f_11_3*np.exp(-1j*k@next_n_n[2]))
+            fk_11 = 2*D*S*s*(f_11_1*np.sin(k@next_n_n[0])+f_11_2*np.sin(k@next_n_n[1])+f_11_3*np.sin(k@next_n_n[2]))
+
+            # LL
+            f_12_1 = e_in_1@next_n_n[0]*e_out_2@next_n_n[0]
+            f_12_2 = e_in_1@next_n_n[1]*e_out_2@next_n_n[1]
+            f_12_3 = e_in_1@next_n_n[2]*e_out_2@next_n_n[2]
+            #fk_12 = 1j*2*D*S*(f_12_1*np.exp(-1j*k@next_n_n[0])+f_12_2*np.exp(-1j*k@next_n_n[1])+f_12_3*np.exp(-1j*k@next_n_n[2]))
+            fk_12 = 2*D*S*s*(f_12_1*np.sin(k@next_n_n[0])+f_12_2*np.sin(k@next_n_n[1])+f_12_3*np.sin(k@next_n_n[2]))
+
+            # RR
+            f_21_1 = e_in_2@next_n_n[0]*e_out_1@next_n_n[0]
+            f_21_2 = e_in_2@next_n_n[1]*e_out_1@next_n_n[1]
+            f_21_3 = e_in_2@next_n_n[2]*e_out_1@next_n_n[2]
+            #fk_21 = 1j*2*D*S*(f_21_1*np.exp(-1j*k@next_n_n[0])+f_21_2*np.exp(-1j*k@next_n_n[1])+f_21_3*np.exp(-1j*k@next_n_n[2]))
+            fk_21 = 2*D*S*s*(f_21_1*np.sin(k@next_n_n[0])+f_21_2*np.sin(k@next_n_n[1])+f_21_3*np.sin(k@next_n_n[2]))
+
+            # RL
+            f_22_1 = e_in_2@next_n_n[0]*e_out_2@next_n_n[0]
+            f_22_2 = e_in_2@next_n_n[1]*e_out_2@next_n_n[1]
+            f_22_3 = e_in_2@next_n_n[2]*e_out_2@next_n_n[2]
+            #fk_22 = 1j*2*D*S*(f_22_1*np.exp(-1j*k@next_n_n[0])+f_22_2*np.exp(-1j*k@next_n_n[1])+f_22_3*np.exp(-1j*k@next_n_n[2]))
+            fk_22 = 2*D*S*s*(f_22_1*np.sin(k@next_n_n[0])+f_22_2*np.sin(k@next_n_n[1])+f_22_3*np.sin(k@next_n_n[2]))
+
+            # set fk to zero (i dont know why)
+            fk_11 = fk_11*f
+            fk_12 = fk_12*f
+            fk_21 = fk_21*f
+            fk_22 = fk_22*f
+
+            t_RL_1 = fk_11*sinh_12_m*sinDouble
+            t_RL_2 = 0.5*(1-v)*(gk_11*np.exp(1j*phase)-gkb_11*np.exp(-1j*phase.conj()))*cosh_12_p*sinDouble
+            t_RL_3 = (-v*gk_11)*(cosh1*sinh2*sin**2+sinh1*cosh2*cos**2)*np.exp(1j*phase)+(-v*gkb_11)*(-cosh1*sinh2*cos**2-sinh1*cosh2*sin**2)*np.exp(-1j*phase)
+            t_RL = t_RL_3+t_RL_1+t_RL_2
+            
+            t_LR_1 = fk_22*sinh_12_m*sinDouble
+            t_LR_2 = 0.5*(1-v)*(gk_22*np.exp(1j*phase)-gkb_22*np.exp(-1j*phase.conj()))*cosh_12_p*sinDouble
+            t_LR_3 = (-v*gk_22)*(cosh1*sinh2*sin**2+sinh1*cosh2*cos**2)*np.exp(1j*phase)+(-v*gkb_22)*(-cosh1*sinh2*cos**2-sinh1*cosh2*sin**2)*np.exp(-1j*phase)
+            t_LR = t_LR_3+t_LR_1+t_LR_2
+            nu = 0
+            rho = 0
+            rho_tilde = 0
+            for l in range(no_n_n):
+                nu += (J*S)**2*np.dot(xy_n_n[l],np.sin(k@diff_n_n[l].T))
+            for n in range(no_next_n_n):
+                for m in range(no_n_n):
+                    rho += np.sin(k@next_n_n[n].T)*(next_n_n_xy_prod[n]*n_n_xy_diff[m]-n_n_xy_prod[m]*next_n_n_xy_diff[n])*np.sin(phase-k@n_n[m].T)
+                    rho_tilde += next_xy_nn[n,m]*np.cos(k@next_n_n[n])*np.cos(phase-k@n_n[m].T)
+            rho = 4*J*D*S**2*s*rho
+            rho_tilde = 2*J*D*S**2*s*rho_tilde
+            
+            xi_p_k = (1-v)*sinh1Double*cosDouble**2
+            xi_m_k = (1-v)*sinh2Double*cosDouble**2 # for two-magnon pair
+            zeta_k = cosh_12_m*sinDouble*((1-v)*sinh_12_p*sinDouble-v*cosh_12_p) # for FM
+            sigma_k = sinh_12_m*sinDouble*((1-v)*cosh_12_p*sinDouble-v*sinh_12_p) # for AFM
+            
+            # (alpha mode -> +; beta mode -> -)
+            
+            # two magnon
+            p_13_1 = -(1-v)**2*cosh1Double
+            p_13_2 = v*(1-v)*sinh1Double*sinDouble
+            p_13[i,j] = a**2*nu*cosDouble*(p_13_1+p_13_2)+rho*xi_p_k
+            p_24_1 = -(1-v)**2*cosh2Double
+            p_24_2 = v*(1-v)*sinh2Double*sinDouble
+            p_24[i,j] = -a**2*nu*cosDouble*(p_24_1+p_24_2)-rho*xi_m_k
+            
+            # FM
+            p_12_1 = v**2*cosh_12_p*cosh_12_m
+            p_12_2 = -v*(1-v)*cosh_12_m*sinh_12_p*sinDouble
+            p_12[i,j] =  -a**2*nu*cosDouble*(p_12_1+p_12_2)-rho*zeta_k
+            
+            # AFM
+            p_14_1 = v**2*sinh_12_p*sinh_12_m
+            p_14_2 = -v*(1-v)*sinh_12_m*cosh_12_p*sinDouble
+            p_14[i,j] = a**2*nu*cosDouble*(p_14_1+p_14_2)+rho*sigma_k
+            
+            # berry curvature
+#             berry_p_1 = p_13[i,j]/(4*ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(ep-em)**2
+#             berry_p_2 = (xi_p_k/(4*ep)**2+sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho-rho_tilde)
+#             berry_p[i,j] = (2/a**2)*(berry_p_1-berry_p_2)
+            berry_p_1 = nu*cosDouble*(p_12_1+p_12_2)-(rho_tilde)*zeta_k # FM
+            berry_p_2 = nu*cosDouble*(p_14_1+p_14_2)-(rho_tilde)*sigma_k # AFM
+            berry_p_3 = nu*cosDouble*(p_13_1+p_13_2)-(rho_tilde)*xi_p_k # two magnon
+            berry_p[i,j] = -2*(berry_p_3/(ep+ep)**2+berry_p_2/(ep+em)**2+berry_p_1/(em-ep)**2)
+            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
+            
+            berry_m_1 = -nu*cosDouble*(p_12_1+p_12_2)+(rho_tilde)*zeta_k # FM
+            berry_m_2 = nu*cosDouble*(p_14_1+p_14_2)-(rho_tilde)*sigma_k # AFM
+            berry_m_3 = -nu*cosDouble*(p_24_1+p_24_2)+(rho_tilde)*xi_m_k # two magnon
+            berry_m[i,j] = -2*(berry_m_3/(em+em)**2+berry_m_2/(ep+em)**2+berry_m_1/(ep-em)**2)
+            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
+            
+        if i%50 == 0:
+                print(f'{i}: done')
+    p_array = np.array([p_13,p_24,p_12,-p_12,p_14,p_14])
+    berry_array = np.array([berry_p,berry_m])
+    berry_rcd_array = np.array([berry_rcd_p,berry_rcd_m])
+    energy_array = np.array([energy_upper,energy_lower])
+    return p_array, berry_array, berry_rcd_array, energy_array
+# %%

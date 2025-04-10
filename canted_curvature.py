@@ -324,8 +324,8 @@ s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 # %%
 # s_values = [0.25, 0.50, 0.75, 0.99]
 # D_values = [0.0125,  0.025, 0.05, 0.1,]
-s_values = [0, 0.25, 0.75]
-D_values = [ 0, 0.0125, 0.025, 0.05, 0.075, 0.1]
+s_values = [0, 0.25, 0.6, 0.75]
+D_values = [0, 0.0125, 0.05, 0.1]
 
 #berry_curvatures = [get_berry_curvature_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
 expanded, exact = map(list, zip(*[get_berry_curvature_exact(J=J, D=D, S=S, B0=s)  for s in s_values for D in D_values]))
@@ -356,7 +356,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, expanded[4][i], cmap="jet",) 
+        pc = axes[i].pcolormesh(kx, ky, expanded[7+6][i], cmap="jet",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
@@ -376,4 +376,6 @@ with plt.style.context(['science','ieee']):
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
 # %%#
-# print(bz_integration_honeycomb(nu[3][1])/(2*np.pi))
+print(bz_integration_honeycomb(exact[9][1])/(2*np.pi))
+
+# %%

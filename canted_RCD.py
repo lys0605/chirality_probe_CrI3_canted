@@ -19,7 +19,7 @@ def get_RCD_exact(J=1,D=0.1,S=5/2,B0=0.5,m=0):
         B0 (float): Saturation field ratio (sin\theta)
 
     Returns:
-        RCD_array (np.ndarray): The RCD for different processes
+        RCD_array (np.ndarray): The RCD for different processes (2M, AFM, FM)
     """
     # field
     Bs = 3*J*S # not 6JS here
@@ -156,16 +156,16 @@ def get_RCD_exact(J=1,D=0.1,S=5/2,B0=0.5,m=0):
         if i%50 == 0:
                 print(f'Iteration {i}: B={B0:.2f}, D={D:.3f}: done')
     # RCD_array = np.array([p_13,p_24,p_12,-p_12,p_14,p_14])
-    RCD_array = np.array([[p_13, -p_12, p_14],[p_24, p_12, p_14]])
+    RCD_array = np.array([[p_13, p_14, -p_12],[p_24, p_14, p_12,]])
     return RCD_array
 
 J = 1 # meV
 D = 0.1 # D/J = 0.1
-S = 5/2 # spin number
+S = 5 # spin number; we divided by overall two factor in each term of Hamiltonian, so S=5 to compensate
 s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
-s_values = [0.25, 0.5, 0.75, 1]
+s_values = [0.25, 0.5, 0.6, 0.75, 1]
 D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
 
 RCD = [get_RCD_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
@@ -175,13 +175,13 @@ honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 kx,ky = bzmesh(m=2)
 
 # %% ploting 
-color_bar_title_upper = [r"$C_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}$", 
-                         r"$C_{\bar{\beta}^{\prime}\bar{\alpha}}$",
-                         r"$C_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}$",] # 2M, FM, AFM
+color_bar_title_upper = [r"$\chi_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}$", 
+                         r"$\chi_{\bar{\beta}^{\prime}\bar{\alpha}}$",
+                         r"$\chi_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}$",] # 2M, FM, AFM
 
-color_bar_title_lower = [r"$C_{{\beta}^{\prime}\bar{\beta}^{\prime}}$",
-                         r"$C_{{\alpha}^{\prime}{\beta}}$",
-                         r"$C_{{\beta}^{\prime}\bar{\alpha}^{\prime}}$",]
+color_bar_title_lower = [r"$\chi_{{\beta}^{\prime}\bar{\beta}^{\prime}}$",
+                         r"$\chi_{{\alpha}^{\prime}{\beta}}$",
+                         r"$\chi_{{\beta}^{\prime}\bar{\alpha}^{\prime}}$",]
 color_bar_title = [color_bar_title_upper, color_bar_title_lower]
 
 pads = [0, 12]
@@ -214,6 +214,6 @@ with plt.style.context(['science','ieee']):
     plt.show()
 # %%
 
-get_symmetry_pts_index_honeycomb()
-print(RCD[8][0][1][333,201])
+# get_symmetry_pts_index_honeycomb()
+# print(RCD[8][0][1][333,201])
 # %%
