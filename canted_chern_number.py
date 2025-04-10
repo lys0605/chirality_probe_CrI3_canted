@@ -186,8 +186,9 @@ S = 5/2 # spin number
 s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
-s_values = np.array([0.25, 0.5, 0.75, 1])
-D_values = np.array([0.1, 0.125, 0.15, 0.175, 0.2, 0.225, 0.25, 0.275, 0.3])
+# s_values = np.array([0.25, 0.5, 0.75, 1])
+s_values = np.array([0.01, 0.02, 0.03])
+D_values = np.linspace(0, 0.0003, num=5)
 
 C_p = np.zeros((s_values.size, D_values.size))
 C_m = np.zeros((s_values.size, D_values.size))
@@ -201,40 +202,40 @@ Cherns = np.array([C_p, C_m])
 
 # %% plot
 
-mpl.rcParams['xtick.labelsize'] = 32
-mpl.rcParams['ytick.labelsize'] = 32
-mpl.rcParams['axes.labelsize'] = 30
+mpl.rcParams['xtick.labelsize'] = 18
+mpl.rcParams['ytick.labelsize'] = 18
+mpl.rcParams['axes.labelsize'] = 18
 
-color_bar_title = [r"$C_{+}$",r"$C_{-}$"]
-color_bar_title_RCD = [r"$C_{+}^{\text{RCD}}$",r"$C_{-}^{\text{RCD}}$"]
-color_bar_title_FM = [r"$C_{+}^{\text{FM}}$",r"$C_{-}^{\text{FM}}$"]
-color_bar_title_noFM = [r"$C_{+}^{\text{noFM}}$",r"$C_{-}^{\text{noFM}}$"]
-color_bar_title_rest = [r"$C_{+}^{\text{Rest}}$",r"$C_{-}^{\text{Rest}}$"]
-pads = [0, 15]
+color_bar_title = [r'$C_+$', r'$C_{-}$']
+pads = [0, 7]
 
-with plt.style.context(['ieee']):
-    px,py = np.meshgrid(D_values, s_values)
+px,py = np.meshgrid(D_values, s_values)
+
+with plt.style.context(['science', 'ieee']):
     
-    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.25)
+    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.5)
 
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
-   for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, Cherns[i], cmap="jet")
+    for i in range(2):
+        pc = axes[i].pcolormesh(px, py, Cherns[i], cmap="jet")
 
         clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(color_bar_title_RCD[i], loc='left', fontsize=34, pad=pads[i])
+        clb.ax.set_title(color_bar_title[i], loc='left', fontsize=18, pad=pads[i])
         clb.ax.tick_params(labelsize=16)
 
         axes[i].set_axis_on() # make sure the axis is on
         axes[i].grid(False) # make sure the grid is off
 
-        axes[i].set_xticks([0.1, 0.15, 0.2, 0.25, 0.3])
-        axes[i].set_xticklabels([r'$0.1$',r'$0.15$',r'$0.2$',r'$0.25$',r'$0.3$'])
+        #axes[i].set_xticks([0.1, 0.15, 0.2, 0.25, 0.3])
+        #axes[i].set_xticklabels([r'$0.1$',r'$0.15$',r'$0.2$',r'$0.25$',r'$0.3$'])
 
-        axes[i].set_xlabel(r'$D/J$', fontsize=34)
-        axes[i].set_ylabel(r'$B/B_s$', fontsize=34)
+        axes[i].set_xlabel(r'$D/J$', fontsize=18)
+        axes[i].set_ylabel(r'$B/B_s$', fontsize=18)
     plt.show()
 
 # %% savefig
 # fig.savefig('figures/chern_numbers/canted_chern_number.pdf', bbox_inches='tight')
+
+print(Cherns[0])
+# %%

@@ -193,7 +193,7 @@ with plt.style.context(['science','ieee']):
     for i in range(2):
         for j in range(3):
 
-            pc = axes[i][j].pcolormesh(kx, ky, RCD[8][i][j], cmap="jet")
+            pc = axes[i][j].pcolormesh(kx, ky, RCD[19][i][j], cmap="jet")
             
             plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i][j], linestyle='-', linewidth=1, color='k')
 
@@ -212,4 +212,8 @@ with plt.style.context(['science','ieee']):
             axes[i][j].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
             axes[i][j].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
+# %%
+
+get_symmetry_pts_index_honeycomb()
+print(RCD[8][0][1][333,201])
 # %%

@@ -91,7 +91,7 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
     """
     # field
     Bs = 3*J*S # not 6JS here
-    B = (B0-0.001)*Bs
+    B = (B0)*Bs
     s = B/Bs
     
     # parameters
@@ -124,7 +124,9 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
     dot = np.vectorize(np.dot,signature='(n),(m)->()')
     
     # meshgrid
-    kx,ky = bzmesh(m=2)
+    x = np.linspace(-np.pi,np.pi,2*200+1) # 200x200
+    y = np.linspace(-np.pi,np.pi,2*200+1)
+    kx,ky = np.meshgrid(x,y)
      
     # two-magnon pair creation (same modes but opposite momentum), FM, AFM
     p_13 = np.zeros(kx.shape)
@@ -135,6 +137,22 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
     berry_m = np.zeros(kx.shape)
     berry_rcd_p = np.zeros(kx.shape)
     berry_rcd_m = np.zeros(kx.shape)
+    berry_FM = np.zeros(kx.shape)
+
+    # parameters array
+    nu_array = np.zeros(kx.shape)
+    omega_p_array = np.zeros(kx.shape)
+    omega_m_array = np.zeros(kx.shape)
+    omega_p_first_array = np.zeros(kx.shape)
+    omega_p_second_array = np.zeros(kx.shape)
+    rp_array = np.zeros(kx.shape)
+    rm_array = np.zeros(kx.shape)
+    sinhp_array = np.zeros(kx.shape)
+    sinhm_array = np.zeros(kx.shape)
+    hyperbolic_array = np.zeros(kx.shape)
+    hyperbolic_array_2 = np.zeros(kx.shape)
+    Mp_array = np.zeros(kx.shape)
+    Mm_array = np.zeros(kx.shape)
     
     kx = kx[0]
     ky = ky.T[0]
@@ -216,26 +234,101 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
             p_14_1 = v**2*sinh_12_p*sinh_12_m
             p_14_2 = -v*(1-v)*sinh_12_m*cosh_12_p*sinDouble
             p_14[i,j] = a**2*nu*cosDouble*(p_14_1+p_14_2)+rho*sigma_k
-            
+
+            # expansion parameters
+            delta_k_no_D = v*np.abs(phi_k)
+            Ep_no_D = Bs + delta_k_no_D
+            Em_no_D = Bs - delta_k_no_D
+            ep_no_D = np.emath.sqrt((Ep_no_D)**2-(1-v)**2*aphi_k)
+            em_no_D = np.emath.sqrt((Em_no_D)**2-(1-v)**2*aphi_k)
+            J_p_no_D = 1-(Ep_no_D)/(ep_no_D*delta_k_no_D)
+            J_m_no_D = 1-(Em_no_D)/(em_no_D*delta_k_no_D)
+            ratio_p_no_D = (Bs + delta_k_no_D)/ep_no_D
+            ratio_m_no_D = (Bs - delta_k_no_D)/em_no_D
+            sinh_p_double_no_D = np.emath.sqrt(ratio_p_no_D**2-1)
+            sinh_m_double_no_D = np.emath.sqrt(ratio_m_no_D**2-1) # need extra minus sign
+
+            J_p = 1-(Ep)/(ep*delta_k)
+            J_m = 1-(Em)/(em*delta_k)
+
+            # Berry curvature related terms (expansion)
+            # 2M
+            Mp_no_D = -(1-v)**2*ratio_p_no_D+v*(1-v)*sinh_p_double_no_D
+            Mm_no_D = -(1-v)**2*ratio_m_no_D-v*(1-v)*sinh_m_double_no_D
+            Pp_no_D = (1-v)**2*ratio_p_no_D*J_p_no_D/Ep_no_D+v*(1-v)*sinh_p_double_no_D*(1-J_p_no_D/(sinh_p_double_no_D**2*Ep_no_D))/delta_k_no_D
+            Pm_no_D = (1-v)**2*ratio_m_no_D*J_m_no_D/Em_no_D+v*(1-v)*sinh_m_double_no_D*(1+J_m_no_D/(sinh_m_double_no_D**2*Em_no_D))/delta_k_no_D
+            omega_p_2M_no_D = Mp_no_D*nu
+            omega_m_2M_no_D = Mm_no_D*nu
+            omega_p_2M_second_D = (lambda_k/delta_k_no_D)*(nu*lambda_k*(-((1-J_p_no_D)/ep_no_D+1/(2*delta_k_no_D))*Mp_no_D-Pp_no_D)+rho*(1-v)*sinh_p_double_no_D)
+            omega_m_2M_second_D = (lambda_k/delta_k_no_D)*(nu*lambda_k*(-((1-J_m_no_D)/em_no_D+1/(2*delta_k_no_D))*Mm_no_D+Pm_no_D)-rho*(1-v)*sinh_m_double_no_D)
+            omega_p = lambda_k/(4*ep_no_D**2*delta_k_no_D)*(omega_p_2M_no_D+omega_p_2M_second_D)
+            omega_m = -lambda_k/(4*em_no_D**2*delta_k_no_D)*(omega_m_2M_no_D+omega_m_2M_second_D)
+
+            # AFM
+            M_AFM_no_D = v**2*(ratio_p_no_D-ratio_m_no_D)-v*(1-v)*(sinh_p_double_no_D+sinh_m_double_no_D)
+            P_AFM_no_D = v**2*(J_p_no_D/ep_no_D+J_m_no_D/em_no_D)-v*(1-v)*(J_p_no_D/(sinh_p_double_no_D*Ep_no_D)-J_m_no_D/(sinh_m_double_no_D*Em_no_D))
+            comparing_factor = nu*lambda_k/delta_k_no_D-rho/v
+            sigma_second = lambda_k**2/(2*delta_k_no_D)*(P_AFM_no_D-M_AFM_no_D-v*(1-v)*(sinh_p_double_no_D+sinh_m_double_no_D))
+            omega_AFM_first = M_AFM_no_D*comparing_factor
+            omega_AFM_third = sigma_second*comparing_factor+nu*lambda_k**3/(2*delta_k_no_D**2)*v*(1-v)*(sinh_p_double_no_D+sinh_m_double_no_D)-lambda_k*omega_AFM_first*(1/(2*delta_k_no_D**2)+(2-J_p_no_D-J_m_no_D)/(em_no_D+ep_no_D))
+            omega_AFM = -2*(omega_AFM_first+omega_AFM_third)/(2*(ep_no_D+em_no_D)**2)
+
+            # FM
+            M_FM_no_D = v**2*(ratio_p_no_D+ratio_m_no_D)-v*(1-v)*(sinh_p_double_no_D-sinh_m_double_no_D)
+            P_FM_no_D = v**2*(J_p_no_D/ep_no_D-J_m_no_D/em_no_D)-v*(1-v)*(J_p_no_D/(sinh_p_double_no_D*Ep_no_D)+J_m_no_D/(sinh_m_double_no_D*Em_no_D))
+            zeta_second = lambda_k**2/(2*delta_k_no_D)*(P_AFM_no_D-M_AFM_no_D+v*(1-v)*(sinh_p_double_no_D-sinh_m_double_no_D))
+            omega_FM_first = M_FM_no_D*comparing_factor
+            omega_FM_third = zeta_second*comparing_factor+nu*lambda_k**3/(2*delta_k_no_D**2)*M_FM_no_D*(1-1/delta_k_no_D-(J_m_no_D-J_p_no_D)/(delta_k_no_D*(ep_no_D-em_no_D)))
+            omega_FM = -2*(omega_FM_first+omega_FM_third)/(2*(ep_no_D-em_no_D)**2)
+
+            # for around K, K' points
+            A_K = a**2*nu*cosDouble
+            # 2M
+            M_2M_K = -(1-v)**2
+            omega_p_K = -2*(A_K*M_2M_K)/(4*(Bs+np.abs(lambda_k))**2)
+            omega_m_K = 2*(A_K*M_2M_K)/(4*(Bs-np.abs(lambda_k))**2)
+
+            # FM
+            M_FM_K = v**2
+            omega_FM_K = -2*(A_K*M_FM_K)/(4*lambda_k**2)
+
             # berry curvature
-            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+0*2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
-            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-0*2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
-            
+            berry_FM[i,j] = (lambda_k*nu/delta_k-rho*(1-0.5*lambda_k**2/delta_k**2))/(4*delta_k**2)
+            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-1*p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
+            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+1*p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
+            nu_array[i,j] = delta_k
+            rp_array[i,j] = J_p
+            sinhp_array[i,j] = xi_p_k
+            sinhm_array[i,j] = xi_m_k
+            rm_array[i,j] = J_m
+            hyperbolic_array[i,j] = sinh1Double
+            hyperbolic_array_2[i,j] = sinh2Double
+            omega_p_array[i,j] = omega_FM_K
+            omega_m_array[i,j] = -omega_FM_K
+            omega_p_first_array[i,j] = omega_p_2M_no_D
+            omega_p_second_array[i,j] = omega_p_2M_second_D
+            Mp_array[i,j] = (-(1-v)**2*ratio_p_no_D+v*(1-v)*sinh_p_double_no_D)*nu*lambda_k/delta_k_no_D
+            Mm_array[i,j] = (-(1-v)**2*ratio_m_no_D-v*(1-v)*sinh_m_double_no_D)*nu*lambda_k/delta_k_no_D
+
+
         if i%50 == 0:
                 print(f'{i}, B={B0:.2f}, D={D:.3f}: done')
     berry_rcd_array = np.array([berry_rcd_p,berry_rcd_m])
-    return berry_rcd_array
+    return [sinhp_array, sinhm_array], [berry_rcd_p, berry_rcd_m]
 
 J = 1 # meV
 D = 0.1 # D/J = 0.1
-S = 5/2 # spin number
+S = 5 # spin number
 s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
-s_values = [0.25, 0.5, 0.75, 1]
-D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
+# s_values = [0.25, 0.50, 0.75, 0.99]
+# D_values = [0.0125,  0.025, 0.05, 0.1,]
+s_values = [0, 0.25, 0.75]
+D_values = [ 0, 0.0125, 0.025, 0.05, 0.075, 0.1]
 
-berry_curvatures = [get_berry_curvature_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
+#berry_curvatures = [get_berry_curvature_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
+expanded, exact = map(list, zip(*[get_berry_curvature_exact(J=J, D=D, S=S, B0=s)  for s in s_values for D in D_values]))
 # %%
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
@@ -244,23 +337,31 @@ kx,ky = bzmesh(m=2)
 # %% ploting 
 color_bar_title = [r"$\Omega_{+}$",r"$\Omega_{-}$"]
 color_bar_title_RCD = [r"$\Omega_{+}^{\text{RCD}}$",r"$\Omega_{-}^{\text{RCD}}$"]
+color_bar_title_2M = [r"$\Omega_{+}^{\text{2M}}$",r"$\Omega_{-}^{\text{2M}}$"]
+color_bar_title_AFM = [r"$\Omega_{+}^{\text{AFM}}$",r"$\Omega_{-}^{\text{AFM}}$"]
 color_bar_title_FM = [r"$\Omega_{+}^{\text{FM}}$",r"$\Omega_{-}^{\text{FM}}$"]
 color_bar_title_noFM = [r"$\Omega_{+}^{\text{noFM}}$",r"$\Omega_{-}^{\text{noFM}}$"]
 color_bar_title_rest = [r"$\Omega_{+}^{\text{Rest}}$",r"$\Omega_{-}^{\text{Rest}}$"]
+color_bar_title_compare = [r"$\Omega_{+}^{\text{2M}^{(0)}}$",r"$\Omega_{+}^{\text{2M}^{(2)}}$"]
+color_bar_title_rho = [r"$\rho^{\text{RL}}$",r"$\tilde{\rho}$"]
+color_bar_title_hyperbolic = [r"$\sinh 2\chi_{+}$",r"$\sinh 2\chi_{-}$"]
+color_bar_title_M = [r"$AM_{+}$",r"$AM_{-}$"]
+color_bar_title_J = [r"$J_{+}$",r"$J_{-}$"]
+# color_bar_title_exact = [r"$$", r"$-\rho_k^{\text{RL}}\sin 2\psi_k$"]
 
-pads = [0, 7]
+pads = [7, 7]
 with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.25)
+    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.4)
 
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, berry_curvatures[19][i], cmap="jet")
+        pc = axes[i].pcolormesh(kx, ky, expanded[4][i], cmap="jet",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
         clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(color_bar_title_RCD[i], loc='left', fontsize=16, pad=pads[i])
+        clb.ax.set_title(color_bar_title_AFM[i], loc='left', fontsize=16, pad=pads[i])
         clb.ax.tick_params(labelsize=16)
 
         axes[i].set_axis_on() # make sure the axis is on
@@ -274,7 +375,5 @@ with plt.style.context(['science','ieee']):
         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
-# %%
-
-bz_integration_honeycomb(berry_curvatures[9][0]-berry_curvatures[2][0])/(2*np.pi)
-# %%
+# %%#
+# print(bz_integration_honeycomb(nu[3][1])/(2*np.pi))
