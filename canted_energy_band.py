@@ -77,6 +77,7 @@ def canted_energy(k,J=1.54,D=0.1,S=5/2,s=0.6):
     '''
     Bs = 6*J*S
     B = s*Bs
+    anisotropy_z = 0.49
     
     # parameters
     M = 6*J*S
@@ -100,10 +101,10 @@ def canted_energy(k,J=1.54,D=0.1,S=5/2,s=0.6):
     varphi_k = 1j*np.log(phi_k/np.abs(phi_k))
     
     # energy band -,+
-    energy = [np.emath.sqrt((M-delta_k)**2-(1-v)**2*phi_k_sq),
-              np.emath.sqrt((M+delta_k)**2-(1-v)**2*phi_k_sq)]
+    energy = np.array([np.emath.sqrt((M-delta_k)**2-(1-v)**2*phi_k_sq),
+              np.emath.sqrt((M+delta_k)**2-(1-v)**2*phi_k_sq)])
 
-    return energy
+    return energyy
 
 def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     '''
@@ -120,6 +121,9 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     Bs = 3*J*S
     B = s*Bs
     v = s**2
+    anisotropy_z = 0.22
+    
+    Bs = Bs + 2*anisotropy_z*S
 
     #
     Gamma = np.array([0, 0]) # Gamma
@@ -146,13 +150,13 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
 
     # parameters after expansion in D
     delta_k_expanded_D = v*np.abs(phi_k)+lam_k**2/(2*v*np.abs(phi_k))
-    delta_k_expanded_s = np.abs(lam_k) + v**2*phi_k_sq/(2*np.abs(lam_k))
+    delta_k_expanded_s = np.abs(lam_k)+ v**2*phi_k_sq/(2*np.abs(lam_k))
     threshold = 1e-2
     delta_k_expanded_D[dot(k,k)>= (np.dot(K1,K1)-threshold)] = delta_k_expanded_s[dot(k,k)>= (np.dot(K1,K1)- threshold)]
 
-    E_p = Bs + delta_k
+    E_p = np.abs(Bs + delta_k)
     E_p_no_D = Bs + v*np.abs(phi_k)
-    E_m = Bs - delta_k
+    E_m = np.abs(Bs - delta_k)
     E_m_no_D = Bs - v*np.abs(phi_k)
     E_p_expanded = Bs + delta_k_expanded_D
     E_m_expanded = Bs - delta_k_expanded_D
@@ -203,17 +207,17 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     # 
 
     # energy band -,+
-    energy = [ep, em]
+    energy = np.array([ep, em])
     expanded_energy = [ep_expanded_D, em_expanded_D]
 
     parameters_array = [ep-em, ep-em]
 
-    return energy
+    return energy/2
 
 #%%
-J = 1 # meV
-D = 0.1*J # D/J = 0.1
-S = 5 # spin number
+J = 2.01 # meV
+D = 0.31 # D/J = 0.1
+S = 3/2 # spin number
 s = 0.25 # saturation field ratio (sin\theta) = B/Bs
 
 k0 = get_kvectors(-1*K1, Gamma)
@@ -228,8 +232,8 @@ k_vectors = group_kvectors(k0, k1, k2, k3, k4)
 # D_values = np.array([0, 0.0125, 0.025, 0.05, 0.075, 0.1,0.2])
 # magnon_bands = [get_band(canted_energy_expansion_D, k_vectors,J=J,D=D,S=S,s=s) for s in s_values for D in D_values]
 #%%
-s_values = [0.25, 0.5, 0.75]
-magnon_bands = [get_band(canted_energy_expansion_D, k_vectors,J=J,D=D,S=S,s=s) for s in s_values]
+s_values = [0.25, 0.5, 0.75, 1.0]
+magnon_bands = [get_band(canted_energy, k_vectors,J=J,D=D,S=S,s=s) for s in s_values]
 
 K2_Gamma = get_path(k0)
 Gamma_K1 = get_path(k1)[1:]
@@ -246,9 +250,9 @@ red_colors = ['#ffc883', '#ff9f4d', '#ff6f00', '#c94c00', '#7f2e00'] # red color
 
 #%%
 with plt.style.context('science'):
-    fig, ax = plt.subplots(figsize=(8,4))
+    fig, ax = plt.subplots(figsize=(6,4))
     for i in range(len(s_values)):
-        plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=rf"$s={s_values[i]}$, "+rf"$d={D}$")
+        plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=rf"$B={s_values[i]}B_s$")
         plot(np.arange(len(path)), magnon_bands[i][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
 
     for i in range(len(k_index)-2):  
@@ -256,15 +260,17 @@ with plt.style.context('science'):
 
     ax.set_xticks(k_index,k_label)
     ax.yaxis.grid()
-    ax.set_xlim(0,len(path))
+    ax.set_xlim(0,len(path)) 
     ax.set_ylim() 
     ax.set_in_layout(True)
-    ax.legend(loc='lower center', bbox_to_anchor=(1.4,0.01), fontsize=8, frameon=True)
+    ax.legend(loc="lower center", bbox_to_anchor=(0.62,0.01), fontsize=14, frameon=True)
     ax.set_ylabel(r"$\epsilon$ (meV)")\
     # $\mathrm{(meV)}$
     fig.tight_layout()
     plt.show()
-#fig.savefig('figures/canted_energy_bands/canted_energy_bands_B=0.75.png', dpi=600 ,bbox_inches='tight')
+#fig.savefig('figures/canted_energy_bands/canted_afm_band_structure.png', dpi=600 ,bbox_inches='tight')
 #
 
+# %%
+print(np.min(magnon_bands[-1][1]))
 # %%

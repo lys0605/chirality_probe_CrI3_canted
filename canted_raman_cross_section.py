@@ -280,57 +280,6 @@ def get_raman_cross_section(qq=0, J=1, D=0.1, S=5/2, B0=0.5):
     return p_13,p_24,p_12,p_34,p_14,p_23
 
 
-J = 1 # meV
-D = 0.1 # D/J = 0.1
-S = 5 # spin number
-s = 0.6 # saturation field ratio (sin\theta) = B/Bs
-
-# %% RL
-s_values = [0.25, 0.5, 0.75, 1]
-D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
-raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
-raman_cross_sections_LR = [np.array(get_raman_cross_section(qq=3,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
-
-honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
-
-kx,ky = bzmesh(m=2)
-
-# %%
-color_bar_title_RL_upper = [r"$|t_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}^{RL}|^2$",
-                            r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
-                            r"$|t_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",] # 2M, FM, AFM
-
-color_bar_title_RL_lower = [r"$|t_{{\beta}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",
-                            r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
-                            r"$|t_{{\beta}^{\prime}\bar{\alpha}^{\prime}^{RL}|^2$",] 
-
-pads = [7, 2, 0]
-
-with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(12,3), nrows=1, ncols=3, width_ratios=[1, 1, 1], height_ratios=[1], hspace=0.1, wspace=0.25)
-
-    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
-
-    for i in range(3):
-        pc = axes[i].pcolormesh(kx, ky, raman_cross_sections_RL[3*5+4][2*i], cmap="jet")
-        
-        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
-
-        clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(color_bar_title_RL_upper[i], loc='left', fontsize=16, pad=pads[i])
-        clb.ax.tick_params(labelsize=16)
-
-        axes[i].set_axis_on() # make sure the axis is on
-        axes[i].grid(False) # make sure the grid is off
-
-        axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
-        axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
-
-        axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-        axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
-    plt.show()
 # %%
 # %%
 def get_raman_cross_section_exact(J=1,D=0.1,S=5/2,B0=0.5, f=1):
@@ -356,9 +305,10 @@ def get_raman_cross_section_exact(J=1,D=0.1,S=5/2,B0=0.5, f=1):
     Bs = 3*J*S # not 6JS here
     B = (B0-0.001)*Bs
     s = B/Bs
+    anisotropy_z = 0.22
     
     # parameters
-    M = 3*J*S
+    M = Bs + 2*anisotropy_z*S
     v = s**2
     
     # lattice parameters
@@ -587,10 +537,62 @@ def get_raman_cross_section_exact(J=1,D=0.1,S=5/2,B0=0.5, f=1):
             berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
             
         if i%50 == 0:
-                print(f'{i}: done')
-    p_array = np.array([p_13,p_24,p_12,-p_12,p_14,p_14])
+                print(f'{i}: done with parameterts J={J}, D={D}, S={S}, B0={B0}')
+    p_array = np.array([p_13,p_24, p_12,-p_12,p_14,p_14])
     berry_array = np.array([berry_p,berry_m])
     berry_rcd_array = np.array([berry_rcd_p,berry_rcd_m])
     energy_array = np.array([energy_upper,energy_lower])
     return p_array, berry_array, berry_rcd_array, energy_array
 # %%
+
+# J = 1 # meV
+# D = 0.1 # D/J = 0.1
+# S = 5 # spin number
+# s = 0.6 # saturation field ratio (sin\theta) = B/Bs
+
+# # %% RL
+# s_values = [0.25, 0.5, 0.75, 1]
+# D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
+# raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+# raman_cross_sections_LR = [np.array(get_raman_cross_section(qq=3,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+
+# honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
+
+# kx,ky = bzmesh(m=2)
+
+# # %%
+# color_bar_title_RL_upper = [r"$|t_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}^{RL}|^2$",
+#                             r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
+#                             r"$|t_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",] # 2M, FM, AFM
+
+# color_bar_title_RL_lower = [r"$|t_{{\beta}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",
+#                             r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
+#                             r"$|t_{{\beta}^{\prime}\bar{\alpha}^{\prime}^{RL}|^2$",] 
+
+# pads = [7, 2, 0]
+
+# with plt.style.context(['science','ieee']):
+#     fig, axes = panel(figsize=(12,3), nrows=1, ncols=3, width_ratios=[1, 1, 1], height_ratios=[1], hspace=0.1, wspace=0.25)
+
+#     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
+#     for i in range(3):
+#         pc = axes[i].pcolormesh(kx, ky, raman_cross_sections_RL[3*5+4][2*i], cmap="jet")
+        
+#         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
+
+#         clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
+#         clb.ax.set_title(color_bar_title_RL_upper[i], loc='left', fontsize=16, pad=pads[i])
+#         clb.ax.tick_params(labelsize=16)
+
+#         axes[i].set_axis_on() # make sure the axis is on
+#         axes[i].grid(False) # make sure the grid is off
+
+#         axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+#         axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
+#         axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+#         axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
+
+#         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
+#         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+#     plt.show()

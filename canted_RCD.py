@@ -177,41 +177,49 @@ kx,ky = bzmesh(m=2)
 # %% ploting 
 color_bar_title_upper = [r"$\chi_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}$", 
                          r"$\chi_{\bar{\beta}^{\prime}\bar{\alpha}}$",
-                         r"$\chi_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}$",] # 2M, FM, AFM
+                         r"$\chi_{{\alpha}^{\prime}\bar{\beta}^{\prime}}$",] # 2M, FM, AFM
 
 color_bar_title_lower = [r"$\chi_{{\beta}^{\prime}\bar{\beta}^{\prime}}$",
                          r"$\chi_{{\alpha}^{\prime}{\beta}}$",
                          r"$\chi_{{\beta}^{\prime}\bar{\alpha}^{\prime}}$",]
 color_bar_title = [color_bar_title_upper, color_bar_title_lower]
+title = ["2M", "AFM", "FM"]
+subplot_labels = [r'$\mathrm{(a)}$', r'$\mathrm{(b)}$', r'$\mathrm{(c)}$']
 
-pads = [0, 12]
+pads = [[7, 0, 0], [12, 12, 12]]
 with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(12,6), nrows=2, ncols=3, width_ratios=[1, 1, 1], height_ratios=[1, 1], hspace=0.4, wspace=0.25)
+    fig, axes = panel(figsize=(12,3), 
+                     nrows=1, ncols=3, 
+                     width_ratios=[1, 1, 1], height_ratios=[1], 
+                     wspace=0.25)
 
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
-    for i in range(2):
+    for i in range(1):
         for j in range(3):
 
-            pc = axes[i][j].pcolormesh(kx, ky, RCD[19][i][j], cmap="jet")
+            pc = axes[j].pcolormesh(kx, ky, RCD[2*5+4][i+1][j], cmap="jet")
             
-            plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i][j], linestyle='-', linewidth=1, color='k')
+            plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[j], linestyle='-', linewidth=1, color='k')
 
-            clb = fig.colorbar(pc, ax=axes[i][j], shrink=0.9)
-            clb.ax.set_title(color_bar_title[i][j], loc='left', fontsize=16, pad=pads[i])
+            clb = fig.colorbar(pc, ax=axes[j], shrink=0.9)
+            clb.ax.set_title(color_bar_title[i+1][j], loc='left', fontsize=16, pad=pads[i+1][j])
             clb.ax.tick_params(labelsize=16)
 
-            axes[i][j].set_axis_on() # make sure the axis is on
-            axes[i][j].grid(False) # make sure the grid is off
+            axes[j].set_axis_on() # make sure the axis is on
+            axes[j].grid(False) # make sure the grid is off
 
-            axes[i][j].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-            axes[i][j].set_xticklabels(['-1', '0', '1'], fontsize=16)
-            axes[i][j].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-            axes[i][j].set_yticklabels(['-1', '0', '1'], fontsize=16)
+            axes[j].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+            axes[j].set_xticklabels(['-1', '0', '1'], fontsize=16)
+            axes[j].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+            axes[j].set_yticklabels(['-1', '0', '1'], fontsize=16)
 
-            axes[i][j].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-            axes[i][j].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+            axes[j].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
+            axes[j].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+            axes[j].set_title(title[j], fontsize=18)
+            letter_annotation(axes[j], -0.2,1, subplot_labels[j],size=18)
     plt.show()
+    fig.savefig('figures/panel_plots/figure9_RCD_lower.png', dpi=300, bbox_inches='tight')
 # %%
 
 # get_symmetry_pts_index_honeycomb()

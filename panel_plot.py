@@ -19,10 +19,6 @@ mpl.rcParams['xtick.labelsize'] = 14
 mpl.rcParams['ytick.labelsize'] = 14
 mpl.rcParams['axes.labelsize'] = 16
 
-def letter_annotation(ax, xoffset, yoffset, letter,size=12):
- ax.text(xoffset, yoffset, letter, transform=ax.transAxes,
-         size=size)
-
 #%% 1x3; figure 1
 img_setup = Image.open('figures/concept_maps/setup.png')
 img_config = Image.open('figures/concept_maps/configuration-canted.png')
@@ -30,8 +26,10 @@ img_dmi = Image.open('figures/concept_maps/DMI_honeycomb.png')
 #%% 
 Nr = 1
 Nc = 3
-fig, axes = plt.subplots(Nr,Nc,figsize=(18,6),gridspec_kw={'width_ratios': [1, 1.2, 1.1]})
-fig.subplots_adjust(wspace=0,hspace=0)
+fig, axes = panel(figsize=(18,6), 
+                  nrows=Nr, ncols=Nc, 
+                  width_ratios=[1, 1.2, 1.1], height_ratios=[1], 
+                  hspace=0, wspace=0)
 axes[0].imshow(img_dmi)
 axes[1].imshow(img_config)
 axes[2].imshow(img_setup)

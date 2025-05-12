@@ -163,3 +163,57 @@ def bz_integration_honeycomb(f_matrix,n=200,m=1):
     f_matrix_in_bz = f_matrix[mask]
     f_matrix_in_bz[np.isnan(f_matrix_in_bz)] = 0
     return np.sum(f_matrix_in_bz)*dk*dk
+
+def bz_product_honeycomb(f_matrix,n=200,m=1):
+    '''
+    Integrate a function over the first Brillouin zone of a honeycomb lattice.
+    
+    Parameters:
+        f_matrix (np.ndarray): The values of function on lattice to integrate.
+        n (int): Number of points in each direction
+        m (int): Number of times the BZ is repeated in each direction
+
+    Returns:
+        np.sum(f_matrix_in_bz)*dk*dk (float): The integral of the function over the BZ.
+    '''
+    # spacing
+    kx, ky = np.meshgrid(np.linspace(-m*np.pi, m*np.pi, 2*n+1),np.linspace(-m*np.pi, m*np.pi, 2*n+1)) # m = 1 -> 1st; 2nd; etc
+    dk = np.abs(kx[0,1]-kx[0,0])
+
+    # BZ of honeycomb
+    a = 1 # lattice 
+    # found by A^T*B=2pi I, where cols of A and B are the primitive vectors in position and reciprocal space respectively
+    M = np.array([0, 1/3])
+    K = np.array([2/(3*np.sqrt(3)),0])
+    theta = np.pi/3
+    
+    verts = 2*np.pi/a*np.array([
+        K, # right, middle (K)
+        rotation2D(K, theta), # right, bottom (K')
+        rotation2D(K, 2*theta), # left, bottom
+        rotation2D(K, 3*theta), # left, middle
+        rotation2D(K, 4*theta), # left, top
+        rotation2D(K, 5*theta), # right, top
+        K, # closed
+    ])
+    
+    codes = [
+        Path.MOVETO, # start
+        Path.LINETO, # join
+        Path.LINETO,
+        Path.LINETO,
+        Path.LINETO,
+        Path.LINETO,
+        Path.CLOSEPOLY, # close
+    ]
+    
+    path = Path(verts, codes, closed=True)
+
+    # filter of points within bz including boundary
+    k_points = np.vstack((kx.flatten(), ky.flatten())).T
+    grid = path.contains_points(k_points, radius=0) # something different from square
+    mask = grid.reshape(2*n+1,2*n+1)
+
+    f_matrix_in_bz = f_matrix[mask]
+    f_matrix_in_bz[np.isnan(f_matrix_in_bz)] = 0
+    return np.prod(f_matrix_in_bz)
