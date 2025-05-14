@@ -104,7 +104,7 @@ def canted_energy(k,J=1.54,D=0.1,S=5/2,s=0.6):
     energy = np.array([np.emath.sqrt((M-delta_k)**2-(1-v)**2*phi_k_sq),
               np.emath.sqrt((M+delta_k)**2-(1-v)**2*phi_k_sq)])
 
-    return energyy
+    return energy
 
 def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     '''

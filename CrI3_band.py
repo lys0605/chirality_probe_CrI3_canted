@@ -94,12 +94,12 @@ def magnon_energy(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2):
 
     # vectorizing function
     dot = np.vectorize(np.dot, signature='(n),(m)->()')
-    gamma_1 = J1*S*np.sum(np.exp(-1j*k@n_n.T), axis=1)
+    gamma_1 = J1*S*np.sum(np.exp(1j*k@n_n.T), axis=1)
     gamma_2 = 2*J2*S*np.sum(np.cos(k@next_n_n.T), axis=1)
-    gamma_3 = J3*S*np.sum(np.exp(-1j*k@next_next_n_n.T), axis=1)
+    gamma_3 = J3*S*np.sum(np.exp(1j*k@next_next_n_n.T), axis=1)
     lambda_k = 2*D*S*np.sum(np.sin(k@next_n_n.T), axis=1)
 
-     # bloch vector
+    # bloch vector
     d0 = M+2*Az*S-gamma_2
     dx = -np.real(gamma_1+gamma_3)
     dy = np.imag(gamma_1+gamma_3)
@@ -111,8 +111,7 @@ def magnon_energy(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2):
     ep = d0+d_abs
 
     # energy band +,-
-    energy = np.array([M+2*Az*S-gamma_2+np.emath.sqrt(lambda_k**2+(np.abs(gamma_1+gamma_3))**2),
-              M+2*Az*S-gamma_2-np.emath.sqrt(lambda_k**2+(np.abs(gamma_1+gamma_3))**2)])
+    energy = np.array([ep,em])
     return energy
 
 #%%

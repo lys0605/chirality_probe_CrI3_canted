@@ -12,15 +12,11 @@ Path = mpath.Path
 # %%
 
 
-def canted_eigs_exact(k,J=1.54,D=0.1,S=5/2,s=0.6):
+def canted_eigs_exact(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2):
     '''
     obtain a the eigenvectors of tauz@matrix H_k for a given k
     energy in meV 
-    k: reciprocal vectors
-    J: exchange interaction coefficient
-    D: DMI coefficient
-    S: spin number
-    s: saturation field ratio (sin\theta)
+    
     '''
     Bs = 6*J*S
     B = s*Bs
