@@ -16,6 +16,9 @@ K1 = 2*np.pi*np.array([2/3,0])/np.sqrt(3) # K
 M = 2*np.pi*np.array([1/2,1/(2*np.sqrt(3))])/np.sqrt(3) # M
 K2 = 2*np.pi*np.array([1/3,1/np.sqrt(3)])/np.sqrt(3) # K'
 
+#%%
+print(K2)
+
 def get_kvectors(pt1,pt2,num=101):
     """
     2D version
@@ -77,7 +80,6 @@ def canted_energy(k,J=1.54,D=0.1,S=5/2,s=0.6):
     '''
     Bs = 6*J*S
     B = s*Bs
-    anisotropy_z = 0.49
     
     # parameters
     M = 6*J*S
@@ -103,7 +105,6 @@ def canted_energy(k,J=1.54,D=0.1,S=5/2,s=0.6):
     # energy band -,+
     energy = np.array([np.emath.sqrt((M-delta_k)**2-(1-v)**2*phi_k_sq),
               np.emath.sqrt((M+delta_k)**2-(1-v)**2*phi_k_sq)])
-
     return energy
 
 def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
@@ -212,13 +213,13 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
 
     parameters_array = [ep-em, ep-em]
 
-    return energy/2
+    return energy
 
 #%%
-J = 2.01 # meV
-D = 0.31 # D/J = 0.1
-S = 3/2 # spin number
-s = 0.25 # saturation field ratio (sin\theta) = B/Bs
+J = 1 `` # meV
+D = 0.1 # D/J = 0.1
+S = 5/2 # spin number
+s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 
 k0 = get_kvectors(-1*K1, Gamma)
 k1 = get_kvectors(Gamma, K1)
@@ -226,6 +227,9 @@ k2 = get_kvectors(K1, M, num=51)
 k3 = get_kvectors(M, K2, num=51)
 k4 = get_kvectors(K2, Gamma)
 k_vectors = group_kvectors(k0, k1, k2, k3, k4)
+
+#%%
+print(k0)
 
 #%%
 # s_values = [0, 0.25, 0.5, 0.75, 1]
@@ -273,4 +277,6 @@ with plt.style.context('science'):
 
 # %%
 print(np.min(magnon_bands[-1][1]))
+# %%
+print(k3)
 # %%

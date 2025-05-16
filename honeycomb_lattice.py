@@ -188,7 +188,7 @@ def bz_product_honeycomb(f_matrix,n=200,m=1):
     theta = np.pi/3
     
     verts = 2*np.pi/a*np.array([
-        K, # right, middle (K)
+        K, # right, middle (K)w
         rotation2D(K, theta), # right, bottom (K')
         rotation2D(K, 2*theta), # left, bottom
         rotation2D(K, 3*theta), # left, middle
@@ -207,7 +207,7 @@ def bz_product_honeycomb(f_matrix,n=200,m=1):
         Path.CLOSEPOLY, # close
     ]
     
-    path = Path(verts, codes, closed=True)
+    path = Path(verts, codes, closed=True) # idea is to connect the corner of BZ via the path
 
     # filter of points within bz including boundary
     k_points = np.vstack((kx.flatten(), ky.flatten())).T

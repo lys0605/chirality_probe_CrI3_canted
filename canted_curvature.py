@@ -64,7 +64,7 @@ def canted_eigs_exact(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2):
     chi2_k = np.arcsinh(sinh2)
     psi_k = np.arcsin(sin)
     
-    phase = np.exp(1j*Re(varphi_k)/2)
+    phase = np.exp(1j*varphi_k/2)
     phase_conj = np.conj(phase)
     
     

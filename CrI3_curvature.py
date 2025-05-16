@@ -123,12 +123,18 @@ def FM_berry_curvature(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2, m=0
     '''
     obtain a the derivatives of tauz@matrix H_k for a given k
     energy in meV 
-    k: reciprocal vectors
-    J: exchange interaction coefficient
-    D: DMI coefficient
-    S: spin number
-    s: saturation field ratio (sin\theta)
-    m: 0 for e_+, 1 for e_-
+    Parameters:
+    ----------
+        k: reciprocal vectors
+        J: exchange interaction coefficient
+        D: DMI coefficient
+        S: spin number
+        s: saturation field ratio (sin\theta)
+        m: 0 for e_+, 1 for e_-
+
+    Returns:
+    -------
+        berry_curvature (float): The Berry curvature.
     '''  
     E, Uk = FM_eigs_exact(k=k,J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
     Hx, Hy = FM_derivatives(k=k,J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
@@ -148,6 +154,41 @@ def FM_berry_curvature(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2, m=0
     
     return berry_curvature
 
+def FM_quantum_metric(k,J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2, m=0):
+    '''
+    obtain a the derivatives of tauz@matrix H_k for a given k
+    energy in meV 
+    Parameters:
+    ----------
+        k: reciprocal vectors
+        J: exchange interaction coefficient
+        D: DMI coefficient
+        S: spin number
+        s: saturation field ratio (sin\theta)
+        m: 0 for e_+, 1 for e_-
+
+    Returns:
+    -------
+        berry_curvature (float): The Berry curvature.
+    '''  
+    E, Uk = FM_eigs_exact(k=k,J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
+    Hx, Hy = FM_derivatives(k=k,J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
+
+    Uik = Uk.conj().T # inverse.T
+    Uik = Uik.T # we want to take the column vector
+#     Uik = LA.inv(Uk).T
+    
+    # calculate berry
+    index = np.array([0,1]) # total bands
+    excluded = np.delete(index,m)
+    
+    quantum_metric = 0
+    
+    for n in excluded:
+        quantum_metric += Re(((Uik[m]@Hx@Uk[n])*(Uik[n]@Hy@Uk[m]))/(E[n]-E[m])**2)
+    
+    return quantum_metric
+
 def get_FM_berry_curvature(J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2, n=200):
     # k-mesh
     kx,ky = bzmesh(n=n, m=2)
@@ -165,6 +206,23 @@ def get_FM_berry_curvature(J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2, n
             print(f'{i}: done with parameters J1={J1}, J2={J2} , J3={J3}, D={D}, Az={Az}, S={S}')
     return np.array([omega_upper, omega_lower])
 
+def get_FM_quantum_metric(J1=2.01, J2=0.16, J3=-0.08, D=0.31, Az=0.49 ,S=3/2, n=200):
+    # k-mesh
+    kx,ky = bzmesh(n=n, m=2)
+    g_upper = np.zeros(kx.shape) #square mesh
+    g_lower = np.zeros(kx.shape)
+    kx = kx[0]
+    ky = ky.T[0]
+    for i in range(ky.size):
+        for j in range(kx.size):
+            k = np.vstack((kx[j],ky[i])).T
+            k = k.reshape(k.shape[1]) 
+            g_upper[i,j] = FM_quantum_metric(k,J1=J1, J2=J2, J3=J3, D=D, Az=Az ,S=S, m=0)
+            g_lower[i,j] = FM_quantum_metric(k,J1=J1, J2=J2, J3=J3, D=D, Az=Az ,S=S, m=1)
+        if i%50 == 0:
+            print(f'{i}: done with parameters J1={J1}, J2={J2} , J3={J3}, D={D}, Az={Az}, S={S}')
+    return np.array([g_upper, g_lower])
+
 
 #%% 
 J1 = 2.01 # n.n Heisenberg coupling meV
@@ -174,7 +232,8 @@ D = 0.31 # DMI meV
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
 
-CrI3_berry_curvatures = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S, n=200) 
+#CrI3_berry_curvatures = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S, n=200) 
+CrI3_quantum_metrics = get_FM_quantum_metric(J1=J1, J2=J2, J3=J3, D=0, Az=Az, S=S, n=200)
 # %%
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
@@ -202,7 +261,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, CrI3_berry_curvatures[i], cmap="jet",) 
+        pc = axes[i].pcolormesh(kx, ky, CrI3_quantum_metrics[i], cmap="jet",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
@@ -222,6 +281,6 @@ with plt.style.context(['science','ieee']):
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
 # %%#
-print(bz_integration_honeycomb(CrI3_berry_curvatures[1], n=200)/(2*np.pi))
+print(bz_integration_honeycomb(CrI3_quantum_metrics[0], n=200)/(2*np.pi))
 
 # %%
