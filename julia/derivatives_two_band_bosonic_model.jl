@@ -21,14 +21,18 @@ n_n = a.*[[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
 next_n_n = a.*[[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
 
 # custom your d₀, d₁, d₂, d₃ functions
-function d₀(kx, ky; J=1.54, S=5/2, K=-0.00344)
+function d₀(kx, ky; J=1.54, S=5/2, K=-0.00344, J₂=0)
     # d₀ function
-    return 3 * J * S - K*(2*S-1)
+    k = [kx, ky]
+    next_n_n = a.*[[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
+    γ₂ = sin(dot(k, next_n_n[1])) + sin(dot(k, next_n_n[2])) + sin(dot(k, next_n_n[3]))
+    return  3 * J * S - K*(2*S-1) + 2 * J₂ * S * γ₂
 end
 
 function d₁(kx, ky; J=1.54, S=5/2)
     # d₁ function
     k = [kx, ky]
+    n_n = a.*[[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
     Reγ = real.(exp(1im * dot(k, n_n[1])) + exp(1im * dot(k, n_n[2])) + exp(1im * dot(k, n_n[3])))
     return J * S * Reγ
 end 
@@ -36,6 +40,7 @@ end
 function d₂(kx, ky; J=1.54, S=5/2)
     # d₂ function
     k = [kx, ky]
+    n_n = a.*[[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
     Imγ = -imag.(exp(1im * dot(k, n_n[1])) + exp(1im * dot(k, n_n[2])) + exp(1im * dot(k, n_n[3])))
     return J * S * Imγ
 end
@@ -43,6 +48,7 @@ end
 function d₃(kx, ky; D=0.36, S=5/2)
     # d₃ function
     k = [kx, ky]
+    next_n_n = a.*[[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
     λ = sin(dot(k, next_n_n[1])) + sin(dot(k, next_n_n[2])) + sin(dot(k, next_n_n[3]))
     return 2 * D * S * λ
 end
@@ -92,8 +98,8 @@ transpose(U_k_inv(1, 1)[1, :]) * U_k(1, 1)[:, 1]
 
 
 # Derivatives of the Hamiltonian or your model
-H₁(kx, ky) = ForwardDiff.derivative(kx -> two_band_bosonic_model(kx, ky), kx)
-H₂(kx, ky) = ForwardDiff.derivative(ky -> two_band_bosonic_model(kx, ky), ky)
+H₁(kx, ky) = ForwardDiff.derivative(kx -> τ₃ * two_band_bosonic_model(kx, ky), kx)
+H₂(kx, ky) = ForwardDiff.derivative(ky -> τ₃ * two_band_bosonic_model(kx, ky), ky)
 H₁₁(kx, ky) = ForwardDiff.derivative(kx -> H₁(kx, ky), kx)
 H₁₂(kx, ky) = ForwardDiff.derivative(ky -> H₁(kx, ky), ky)
 H₂₁(kx, ky) = ForwardDiff.derivative(kx -> H₂(kx, ky), kx)

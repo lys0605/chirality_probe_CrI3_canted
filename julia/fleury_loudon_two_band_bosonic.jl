@@ -77,14 +77,14 @@ dkx = step(kx)
 dky = step(ky)
 
 RCD₁ = [χ₁(kx[i], ky[j])  for i in 1:Nx, j in 1:Ny]
-RCD₂ = [χ₂(kx[i], ky[j])/Δ(kx[i], ky[j])^2 for i in 1:Nx, j in 1:Ny]
+RCD₂ = [χ₂(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 
 honeycomb_BZ_integration(RCD₂; Nx=Nx, Ny=Ny)
 
 # momentum-resolved plot
 fig = Figure()
 ax1 = Axis(fig[1, 1], title="RCD₂", aspect=DataAspect(), xlabel="kx", ylabel="ky")
-hm1 = heatmap!(ax1, kx, ky, RCD₂,  colormap=:viridis)
+hm1 = heatmap!(ax1, kx, ky, RCD₂, colormap=:viridis)
 poly!(ax1, Point2f[K, rot * K, rot^2 * K, rot^3 * K, rot^4 * K, rot^5 * K], color=(:black, 0), alpha=0.5, strokecolor=:black, strokewidth=1)
 Colorbar(fig[1, 2], hm1, label="Energy (meV)")
 fig 

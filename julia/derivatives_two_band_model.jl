@@ -21,14 +21,18 @@ n_n = a.*[[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
 next_n_n = a.*[[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
 
 # custom your d₀, d₁, d₂, d₃ functions
-function d₀(kx, ky; J=1, S=5/2)
+function d₀(kx, ky; J=1, S=5/2, J₂=0.05)
     # d₀ function
-    return 3 * J * S
+    k = [kx, ky]
+    next_n_n = a.*[[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
+    γ₂ = (cos(dot(k, next_n_n[1])) + cos(dot(k, next_n_n[2])) + cos(dot(k, next_n_n[3]))) 
+    return 3 * J * S + 2 * J₂ * S * γ₂
 end
 
 function d₁(kx, ky; J=1, S=5/2)
     # d₁ function
     k = [kx, ky]
+    n_n = a.*[[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
     Reγ = real.(exp(1im * dot(k, n_n[1])) + exp(1im * dot(k, n_n[2])) + exp(1im * dot(k, n_n[3])))
     return J * S * Reγ
 end 
@@ -36,6 +40,7 @@ end
 function d₂(kx, ky; J=1, S=5/2)
     # d₂ function
     k = [kx, ky]
+    n_n = a.*[[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
     Imγ = -imag.(exp(1im * dot(k, n_n[1])) + exp(1im * dot(k, n_n[2])) + exp(1im * dot(k, n_n[3])))
     return J * S * Imγ
 end
@@ -43,6 +48,7 @@ end
 function d₃(kx, ky; D=0.1, S=5/2)
     # d₃ function
     k = [kx, ky]
+    next_n_n = a.*[[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
     λ = sin(dot(k, next_n_n[1])) + sin(dot(k, next_n_n[2])) + sin(dot(k, next_n_n[3]))
     return 2 * D * S * λ
 end
@@ -66,6 +72,12 @@ function berry_curvature_component_formula(kx ,ky)
 
 end
 
+# parameters
+d_abs(kx, ky) = √(d₀(kx, ky)^2 + d₁(kx, ky)^2 + d₂(kx, ky)^2 + d₃(kx, ky)^2)
+cosψ(kx, ky) = √((d_abs(kx, ky) + d₃(kx ,ky))/(2*d_abs(kx,ky)))
+sinψ(kx, ky) = √((d_abs(kx, ky) - d₃(kx ,ky))/(2*d_abs(kx,ky)))
+ϕ(kx ,ky) = im*log((d₁(kx, ky) + im * d₂(kx, ky))/√(d₁(kx, ky)^2 + d₂(kx, ky)^2))
+
 # Derivatives of the Hamiltonian or your model
 H₁(kx, ky) = ForwardDiff.derivative(kx -> two_band_model(kx, ky), kx)
 H₂(kx, ky) = ForwardDiff.derivative(ky -> two_band_model(kx, ky), ky)
@@ -75,10 +87,16 @@ H₂₁(kx, ky) = ForwardDiff.derivative(kx -> H₂(kx, ky), kx)
 H₂₂(kx, ky) = ForwardDiff.derivative(ky -> H₂(kx, ky), ky)
 
 # Eigenvalues and Eigenvectors of the Hamiltonian; and their Derivatives
-E₁(kx, ky) = eigvals(two_band_model(kx, ky))[1]
+E₁(kx, ky) = eigvals(two_band_model(kx, ky))[1] # lower
 E₂(kx, ky) = eigvals(two_band_model(kx, ky))[2]
-u₁(kx, ky) = eigvecs(two_band_model(kx, ky))[:, 1]
-u₂(kx, ky) = eigvecs(two_band_model(kx, ky))[:, 2]
+u₁(kx, ky) = [-sinψ(kx, ky)*exp(im*ϕ(kx, ky)/2), cosψ(kx, ky)*exp(-im*ϕ(kx, ky)/2)]
+u₂(kx, ky) = [cosψ(kx, ky)*expϕ(kx, ky), sinψ(kx, ky)]
+u₁(k::Vector) = u₁(k[1], k[2])
+u₂(k::Vector) = u₂(k[1], k[2])
+v₁(kx, ky) = eigvecs(two_band_model(kx, ky))[:, 1] # lower
+v₂(kx, ky) = eigvecs(two_band_model(kx, ky))[:, 2]
+v₁(k::Vector) = v₁(k[1], k[2])
+v₂(k::Vector) = v₂(k[1], k[2])
 ∂E₁_∂kx(kx, ky) = ForwardDiff.derivative(kx -> E₁(kx, ky), kx)
 ∂E₁_∂ky(kx, ky) = ForwardDiff.derivative(ky -> E₁(kx, ky), ky)
 ∂E₂_∂kx(kx, ky) = ForwardDiff.derivative(kx -> E₂(kx, ky), kx)
@@ -87,6 +105,7 @@ u₂(kx, ky) = eigvecs(two_band_model(kx, ky))[:, 2]
 ∂u₁_∂ky(kx, ky) = ForwardDiff.derivative(ky -> u₁(kx, ky), ky)
 ∂u₂_∂kx(kx, ky) = ForwardDiff.derivative(kx -> u₂(kx, ky), kx)
 ∂u₂_∂ky(kx, ky) = ForwardDiff.derivative(ky -> u₂(kx, ky), ky)
+
 
 # Define the number of points in kx and ky
 Nx = 100

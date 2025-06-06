@@ -53,8 +53,8 @@ function canted_energy(k::Vector{Float64}; J=1.54, D=0.1, S=5/2, s=0.6)
     a = 1 # set to per unit lattice constnat
     
     # lattice structure parameters
-    n_n = [[0, 1], [-√3/2, -1/2], [√3/2, -1/2]]
-    next_n_n = [[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]]
+    n_n = [[0, 1], [-√3/2, -1/2], [√3/2, -1/2]] .* a
+    next_n_n = [[-√3/2, -3/2], [√3, 0], [-√3/2, 3/2]] .* a
     
     # hopping parameters
     gamma = sum(exp.(1im*dot.(Ref(k), transpose(n_n))))
