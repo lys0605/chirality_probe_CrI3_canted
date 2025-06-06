@@ -130,7 +130,7 @@ k4 = get_kvectors(K2, Gamma)
 k_vectors = group_kvectors(k0, k1, k2, k3, k4)
 
 #%%
-magnon_bands = get_band(magnon_energy, k_vectors,J1=J1, J2=J2, J3=J3, D=0.5, Az=Az, S=S)
+magnon_bands = get_band(magnon_energy, k_vectors,J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
 
 K2_Gamma = get_path(k0)
 Gamma_K1 = get_path(k1)[1:]

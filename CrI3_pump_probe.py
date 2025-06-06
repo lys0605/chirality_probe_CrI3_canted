@@ -164,10 +164,11 @@ def plot_frequency_temperature_resolved_RCD(ax, w, chi, temperatures, ls='-', **
     else:
         ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])
 #%% CrI3 parameters from Chen's paper, Phys. Rev. X. 2018
-J1 = 2.01 # n.n Heisenberg coupling meV
+#J1 = 2.01 # n.n Heisenberg coupling meV
 J2 = 0.16 # n.n.n Heisenberg coupling meV
 J3 = -0.08 # n.n.n.n Heisenberg coupling meV
 D = 0.31 # DMI meV
+J1 = 5*D
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
 
@@ -178,12 +179,14 @@ energy_array = get_energy(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
 # %%
 w = np.linspace(0,20,300)
 len_w = len(w)
-width = (w[1]-w[0])*2
+width = (w[1]-w[0])
 
 # %% finite temperature with initial state as one magnon occupied at lowest band
-temperatures = [0, 2, 10, 18, 26, 34, 42, 50, 58]
+#temperatures = [0, 2, 10, 18, 26, 34, 42, 50, 58]
+temperatures = np.linspace(0, 60, 120)
 temp = temperatures[5]
 partition_array = np.array([partition_function(energy_array[0], T=T)*partition_function(energy_array[1], T=T) for T in temperatures])
+
 # %% CrI3
 len_T = len(temperatures)
 chi_FM_lower_T = np.zeros((len_T, len_w))
@@ -197,7 +200,7 @@ for j in range(len_T):
 dos_weighted_FM= np.zeros(len_w)
 
 for i in range(len_w):
-    dos_weighted_FM[i] = bz_integration_honeycomb(berry_array[1]*gaussian_function(w[i], x0=np.abs(energy_array[1]-energy_array[0]), width=width))
+    dos_weighted_FM[i] = bz_integration_honeycomb(berry_array[1]*lorentzian_function(w[i], x0=np.abs(energy_array[1]-energy_array[0]), width=width))
 
 #%%
 print(np.max(energy_array[1]))
@@ -217,14 +220,68 @@ with plt.style.context(['science','ieee']):
     #plt.axvline(w[np.argmin(chi_FM_upper[1])])
     #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
     #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
-    ax.set_xlabel(r'$\hslash\omega/J$', fontsize=11)
+    ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=11)
     ax.set_ylabel(rf'$\chi(\omega, T)$', fontsize=11)
     ax.legend( fontsize=9)
     plt.show()
-    fig.savefig('frequency_resolved_thermal_RCD_CrI3.png', dpi=300, bbox_inches='tight')
+    #fig.savefig('frequency_resolved_thermal_RCD_CrI3.png', dpi=300, bbox_inches='tight')
 
+# %%
+with plt.style.context(['science','ieee']):
+    fig, ax = plt.subplots(figsize=(3.5,3))
 
-# # %%
+    ax.plot(temperatures, gamma_boltzmann/partition_array, color='black')
+    #plot_frequency_resolved_RCD(ax, w, dos_weighted_FM, 1, plot_length=1, ls='--', color=colors_one_magnon[1], label=r'weighted DOS')
+    #plt.axvline(w[np.argmin(chi_FM_upper[1])])
+    #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
+    #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
+    ax.set_xlabel(r'$T$', 
+
+#%%   
+with plt.style.context(['science','ieee']):
+    fig, axes = panel(figsize=(4,3), 
+                     nrows=1, ncols=1, 
+                     width_ratios=[1], height_ratios=[1])
+
+    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
+    x,y = np.meshgrid(w, temperatures)
+    # Define the colormap (e.g., 'RdBu')
+    cmap = plt.get_cmap('RdBu')
+
+    # # Choose where zero should be in the colormap (e.g., black)
+    # zero_color = 'white'  # or 'red', '#FF0000', etc.
+
+    # # Create a custom colormap by inserting the zero color
+    # colors = [cmap(i) for i in np.linspace(0, 1, 256)]
+    # # Find the midpoint (where the original colormap has white)
+    # midpoint = 128  # For symmetric RdBu, this is where white is
+    # colors[midpoint] = mpl.colors.to_rgba(zero_color)  # Replace white with your color
+    # custom_cmap = mpl.colors.LinearSegmentedColormap.from_list('custom_div', colors)
+    # # Apply normalization to center at zero
+    # vmin, vmax = np.min(chi_FM_lower_T), np.max(chi_FM_lower_T)  # Adjust to your data range
+    # norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)    
+
+    pc = axes.pcolormesh(x, y, chi_FM_lower_T, cmap=custom_cmap)
+            
+    #plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes, linestyle='-', linewidth=1, color='k')
+
+    clb = fig.colorbar(pc, ax=axes, shrink=0.9)
+    clb.ax.set_title(r"$\chi$", loc='left', fontsize=16, pad=5)
+    clb.ax.tick_params(labelsize=16)
+
+    axes.set_axis_on() # make sure the axis is on
+    axes.grid(False) # make sure the grid is off
+
+    # axes.set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+    # axes.set_xticklabels(['-1', '0', '1'], fontsize=16)
+    # axes.set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+    # axes.set_yticklabels(['-1', '0', '1'], fontsize=16)
+
+    axes.set_xlabel(r'$\hslash\omega (meV)$', fontsize=18)
+    axes.set_ylabel(r'$T (K)$', fontsize=18)
+    #axes.set_title('RCD of '+r"$CrI_3$", fontsize=18)
+    plt.show()    
 # def normalize(x):
 #     return x/np.max(np.abs(x))
 
@@ -253,7 +310,7 @@ with plt.style.context(['science','ieee']):
 #     plt.show()
     #fig.savefig('figures/pump_probe/frequency_resolved_RCD_vacuum_2dos.png', dpi=300, bbox_inches='tight')
 # %%
-
+gamma_boltzmann = np.array([boltzmann_factor(energy_array[1][67,123],T=temperatures[j]) for j in range(len(temperatures))])
 
 #%% distance and gap
 # gap = np.array([np.min(energy_array[i][0]-energy_array[i][1]) for i in range(4)])
@@ -281,3 +338,5 @@ with plt.style.context(['science','ieee']):
 #     ax.legend(fontsize=12)
 #     plt.show()
     #fig.savefig('figures/pump_probe/gap_distance_fm_peak.png', dpi=300, bbox_inches='tight')
+
+# %%

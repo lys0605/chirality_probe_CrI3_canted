@@ -232,8 +232,8 @@ D = 0.31 # DMI meV
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
 
-#CrI3_berry_curvatures = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S, n=200) 
-CrI3_quantum_metrics = get_FM_quantum_metric(J1=J1, J2=J2, J3=J3, D=0, Az=Az, S=S, n=200)
+CrI3_berry_curvatures = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S, n=200) 
+#CrI3_quantum_metrics = get_FM_quantum_metric(J1=J1, J2=J2, J3=J3, D=0, Az=Az, S=S, n=200)
 # %%
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
@@ -261,7 +261,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, CrI3_quantum_metrics[i], cmap="jet",) 
+        pc = axes[i].pcolormesh(kx, ky, CrI3_berry_curvatures[i], cmap="jet",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
@@ -281,6 +281,6 @@ with plt.style.context(['science','ieee']):
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
 # %%#
-print(bz_integration_honeycomb(CrI3_quantum_metrics[0], n=200)/(2*np.pi))
+print(bz_integration_honeycomb(CrI3_berry_curvatures[0], n=200)/(2*np.pi))
 
 # %%
