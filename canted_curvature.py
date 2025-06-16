@@ -315,7 +315,7 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
 J = 1 # meV
 D = 0.1 # D/J = 0.1
 S = 5 # spin number
-s = 0.6 # saturation field ratio (sin\theta) = B/Bs
+s = 0.75 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
 # s_values = [0.25, 0.50, 0.75, 0.99]
@@ -352,7 +352,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, exact[5][i], cmap="jet",) 
+        pc = axes[i].pcolormesh(kx, ky, exact[-1][i], cmap="jet",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
@@ -374,4 +374,31 @@ with plt.style.context(['science','ieee']):
 # %%#
 print(bz_integration_honeycomb(exact[9][1])/(2*np.pi))
 
+# %%
+with plt.style.context(['science','ieee']):
+    fig, axes = panel(figsize=(4,3), nrows=1, ncols=1, width_ratios=[1], height_ratios=[1], hspace=0.1, wspace=0.4)
+
+    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
+    for i in range(1):
+        pc = axes.pcolormesh(kx, ky, exact[-1][i-1], cmap="jet",) 
+        
+        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes, linestyle='-', linewidth=1, color='k')
+
+        clb = fig.colorbar(pc, ax=axes, shrink=0.9)
+        clb.ax.set_title(color_bar_title[i-1], loc='left', fontsize=16, pad=pads[i])
+        clb.ax.tick_params(labelsize=16)
+
+        axes.set_axis_on() # make sure the axis is on
+        axes.grid(False) # make sure the grid is off
+
+        axes.set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes.set_xticklabels(['-1', '0', '1'], fontsize=16)
+        axes.set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes.set_yticklabels(['-1', '0', '1'], fontsize=16)
+
+        axes.set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
+        axes.set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+    plt.show()
+    fig.savefig('figures/berry_curvatures/canted_berry_curvature_lower_exact.png', dpi=300, bbox_inches='tight')
 # %%

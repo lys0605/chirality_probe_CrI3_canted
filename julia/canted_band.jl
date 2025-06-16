@@ -90,7 +90,7 @@ path_index = get_path_index(k0, k1, k2, k3, k4)
 k_labels = ["K′", "Γ", "K", "M", "K′", "Γ"]
 
 k = [[x, y] for (x,y) in zip(k_vectors[1],k_vectors[2])]
-energy = canted_energy.(k; J=1, s=0.5)
+energy = canted_energy.(k; J=1, s=0.75)
 energy = reduce(hcat, energy)
 
 # plots

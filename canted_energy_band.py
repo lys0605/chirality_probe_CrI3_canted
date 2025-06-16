@@ -216,10 +216,10 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     return energy
 
 #%%
-J = 1 `` # meV
+J = 1  # meV
 D = 0.1 # D/J = 0.1
 S = 5/2 # spin number
-s = 0.6 # saturation field ratio (sin\theta) = B/Bs
+s = 0.75 # saturation field ratio (sin\theta) = B/Bs
 
 k0 = get_kvectors(-1*K1, Gamma)
 k1 = get_kvectors(Gamma, K1)
@@ -236,7 +236,7 @@ print(k0)
 # D_values = np.array([0, 0.0125, 0.025, 0.05, 0.075, 0.1,0.2])
 # magnon_bands = [get_band(canted_energy_expansion_D, k_vectors,J=J,D=D,S=S,s=s) for s in s_values for D in D_values]
 #%%
-s_values = [0.25, 0.5, 0.75, 1.0]
+s_values = [0.25, 0.5, 0.75]
 magnon_bands = [get_band(canted_energy, k_vectors,J=J,D=D,S=S,s=s) for s in s_values]
 
 K2_Gamma = get_path(k0)
@@ -274,9 +274,3 @@ with plt.style.context('science'):
     plt.show()
 #fig.savefig('figures/canted_energy_bands/canted_afm_band_structure.png', dpi=600 ,bbox_inches='tight')
 #
-
-# %%
-print(np.min(magnon_bands[-1][1]))
-# %%
-print(k3)
-# %%
