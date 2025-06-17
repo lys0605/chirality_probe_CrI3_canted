@@ -17,7 +17,20 @@ M = 2*np.pi*np.array([1/2,1/(2*np.sqrt(3))])/np.sqrt(3) # M
 K2 = 2*np.pi*np.array([1/3,1/np.sqrt(3)])/np.sqrt(3) # K'
 
 #%%
-print(K2)
+def draw_circle(ax, center, radius=0.2, xscale=1, yscale=1, handedness='R', turns=2, phase=0, color='black'):
+    t = np.linspace(0, 2*np.pi*turns, 200)
+    if handedness == 'L':
+        t = -t
+    x = center[0] + xscale * radius * np.cos(t+phase)
+    y = center[1] + yscale * radius * np.sin(t+phase)
+    ax.plot(x, y, color=color, linewidth=1.2)
+
+    # Draw arrow at the end of the circle
+    dx = x[-1] - x[-2]
+    dy = y[-1] - y[-2]
+    ax.arrow(x[-2], y[-2], dx, dy,
+             shape='full', head_width=0.5, head_length=2,
+             fc=color, ec=color, linewidth=0)
 
 def get_kvectors(pt1,pt2,num=101):
     """
@@ -265,12 +278,51 @@ with plt.style.context('science'):
     ax.set_xticks(k_index,k_label)
     ax.yaxis.grid()
     ax.set_xlim(0,len(path)) 
-    ax.set_ylim() 
+    ax.set_ylim(0, 25) 
     ax.set_in_layout(True)
     ax.legend(loc="lower center", bbox_to_anchor=(0.62,0.01), fontsize=14, frameon=True)
     ax.set_ylabel(r"$\epsilon$ (meV)")\
     # $\mathrm{(meV)}$
     fig.tight_layout()
     plt.show()
-#fig.savefig('figures/canted_energy_bands/canted_afm_band_structure.png', dpi=600 ,bbox_inches='tight')
+    #fig.savefig('figures/canted_energy_bands/canted_afm_band_structure.png', dpi=600 ,bbox_inches='tight')
 #
+
+# %% capture part of it
+with plt.style.context('science'):
+    fig, ax = plt.subplots(figsize=(6,4))
+    plot(np.arange(len(path))[150:350], magnon_bands[2][1][150:350], ax=ax, color=red_colors[1], linestyle='-', linewidth=1.5, label=rf"$B={s_values[2]}B_s$")
+    plot(np.arange(len(path))[150:350], magnon_bands[2][0][150:350], ax=ax, color=blue_colors[1], linestyle='-', linewidth=1.5)
+
+    ax.axvline(200, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0)
+    ax.axvline(250, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0)
+    ax.axvline(300, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0)
+    ax.set_xticks([200, 250, 300], [r"$K$", r"$M$", r"$K^\prime$"])
+    ax.axis('off')
+
+    ax.annotate("", xytext=(190.5, 15), xy=(210.5, 15),
+            arrowprops=dict(arrowstyle="->"))
+    ax.annotate("", xytext=(290.5, 15), xy=(310.5, 15),
+            arrowprops=dict(arrowstyle="->"))
+
+            
+    ax.annotate("", xytext=(251, 15), xy=(199, 16.9),
+            arrowprops=dict(arrowstyle="->", color=red_colors[1]))
+    ax.annotate("", xytext=(249, 15), xy=(301, 16.9),
+            arrowprops=dict(arrowstyle="->", color=red_colors[1]))
+    ax.annotate("", xytext=(251, 15.1), xy=(199, 13.1),
+            arrowprops=dict(arrowstyle="->", color=blue_colors[1]))
+    ax.annotate("", xytext=(249, 15.1), xy=(301, 13.1),
+            arrowprops=dict(arrowstyle="->", color=blue_colors[1]))
+
+
+    draw_circle(ax, center=(200, 15), handedness='R', radius=1.2, turns=0.85, xscale=3, yscale=0.7, phase=np.pi/12, color='red')
+    draw_circle(ax, center=(300, 15), handedness='L', radius=1.2, turns=0.85, xscale=3, yscale=0.7, phase=-np.pi/12, color='blue')
+
+    ax.annotate(r"K", xy=(196, 7.8), color='k', size=20)
+    ax.annotate(r"M", xy=(246, 7.8), color='k', size=20)
+    ax.annotate(r"K$^\prime$", xy=(296, 7.8), color='k', size=20)
+    plt.show()
+# %%
+
+# %%

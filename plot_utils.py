@@ -64,3 +64,27 @@ def panel(figsize=(8,6), nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1
     #     ax.set_box_aspect(1)
     #     ax.set_axis_off()
     return fig, axes
+
+def panel_unequal(figsize=(8,6), nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1, 1], hspace=0, wspace=0):
+    """
+    Creating a panel of subplots with equal aspect ratio and no space between subplots.
+
+    Parameters:
+        figsize (tuple): Figure size.
+        nrows (int): Number of rows in the panel.
+        ncols (int): Number of columns in the panel.
+        width_ratios (list): Ratios of the width of each column.
+        height_ratios (list): Ratios of the height of each row.
+        hspace (float): Space between rows.
+        wspace (float): Space between columns.
+    
+    Returns:
+        fig (matplotlib.figure.Figure): The figure object.
+        axes (np.ndarray): Array of axes objects.
+    """
+    fig = plt.figure(figsize=figsize)
+    gs = fig.add_gridspec(nrows=nrows, ncols=ncols, hspace=hspace, wspace=wspace, width_ratios=width_ratios, height_ratios=height_ratios)
+    # for ax in axes:
+    #     ax.set_box_aspect(1)
+    #     ax.set_axis_off()
+    return fig, gs

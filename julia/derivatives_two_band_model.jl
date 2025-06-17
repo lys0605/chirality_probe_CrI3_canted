@@ -123,6 +123,7 @@ K = 2π*[2/3,0]/√3 #K
 K′ = rot * K
 
 # Hamiltonian, eigenvalues and eigenvectors
+
 H =  [two_band_model(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 eigenvalues = [eigvals(H[i, j]) for i in 1:Nx, j in 1:Ny]
 eigenvectors = [eigvecs(H[i, j]) for i in 1:Nx, j in 1:Ny]
@@ -197,3 +198,17 @@ honeycomb_mask = bzmesh_points .∈ honeycomb_mesh
 sum(Ω[honeycomb_mask])*dkx*dky/(2π)
 
 honeycomb_BZ_integration(Ω; Nx=100, Ny=100)/(2π)
+
+# plots, path
+f = Figure()
+ax = Axis(f[1,1];
+    title = "Ferromagnetic with DMI on honeycomb lattice",
+    xlabel = "k (1/Å)",
+    ylabel = "Energy (meV)",
+    xticks = (path_index, k_labels),
+    yminorticks = IntervalsBetween(5),
+    yminorticksvisible = true,
+)
+lines!(ax, 1:length(path), lower_band, color = :blue, linewidth = 2)
+lines!(ax, 1:length(path), upper_band, color = :red, linewidth = 2)
+f
