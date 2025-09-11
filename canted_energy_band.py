@@ -17,7 +17,7 @@ M = 2*np.pi*np.array([1/2,1/(2*np.sqrt(3))])/np.sqrt(3) # M
 K2 = 2*np.pi*np.array([1/3,1/np.sqrt(3)])/np.sqrt(3) # K'
 
 #%%
-def draw_circle(ax, center, radius=0.2, xscale=1, yscale=1, handedness='R', turns=2, phase=0, color='black'):
+def draw_circle(ax, center, radius=0.2, xscale=1, yscale=1, handedness='R', turns=2, phase=0, tilde_x=0, tilde_y=0, color='black'):
     t = np.linspace(0, 2*np.pi*turns, 200)
     if handedness == 'L':
         t = -t
@@ -26,11 +26,9 @@ def draw_circle(ax, center, radius=0.2, xscale=1, yscale=1, handedness='R', turn
     ax.plot(x, y, color=color, linewidth=1.2)
 
     # Draw arrow at the end of the circle
-    dx = x[-1] - x[-2]
-    dy = y[-1] - y[-2]
-    ax.arrow(x[-2], y[-2], dx, dy,
-             shape='full', head_width=0.5, head_length=2,
-             fc=color, ec=color, linewidth=0)
+    ax.annotate('', xy=(x[-1]+tilde_x, y[-1]+tilde_y), xytext=(x[-2], y[-2]),
+                arrowprops=dict(arrowstyle='-|>', color=color, lw=1))
+
 
 def get_kvectors(pt1,pt2,num=101):
     """
@@ -249,8 +247,8 @@ print(k0)
 # D_values = np.array([0, 0.0125, 0.025, 0.05, 0.075, 0.1,0.2])
 # magnon_bands = [get_band(canted_energy_expansion_D, k_vectors,J=J,D=D,S=S,s=s) for s in s_values for D in D_values]
 #%%
-s_values = [0.25, 0.5, 0.75]
-magnon_bands = [get_band(canted_energy, k_vectors,J=J,D=D,S=S,s=s) for s in s_values]
+D_values = [0,0.025, 0.05, 0.1]
+magnon_bands = [get_band(canted_energy, k_vectors,J=J,D=D,S=S,s=s) for D in D_values]
 
 K2_Gamma = get_path(k0)
 Gamma_K1 = get_path(k1)[1:]
@@ -268,9 +266,13 @@ red_colors = ['#ffc883', '#ff9f4d', '#ff6f00', '#c94c00', '#7f2e00'] # red color
 #%%
 with plt.style.context('science'):
     fig, ax = plt.subplots(figsize=(6,4))
-    for i in range(len(s_values)):
-        plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=rf"$B={s_values[i]}B_s$")
-        plot(np.arange(len(path)), magnon_bands[i][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
+    for i in range(len(D_values)):
+        if i != 0:
+            plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1, label=rf"$D={D_values[i]}$")
+            plot(np.arange(len(path)), magnon_bands[i][0], ax=ax, color=blue_colors[i], linestyle='-', linewidth=1)
+        else:
+            plot(np.arange(len(path)), magnon_bands[i][1], ax=ax, color=red_colors[i], linestyle='-', linewidth=1, label=rf"$D={D_values[i]}$")
+            plot(np.arange(len(path)), magnon_bands[i][0], ax=ax, color=red_colors[i], linestyle='-', linewidth=1)
 
     for i in range(len(k_index)-2):  
         ax.axvline(k_index[i+1], color="black", ls = '-' ,linewidth=1.0)
@@ -289,40 +291,58 @@ with plt.style.context('science'):
 #
 
 # %% capture part of it
+s_values = [0.25, 0.5, 0.75]
+magnon_bands = [get_band(canted_energy, k_vectors,J=J,D=D,S=S,s=s) for s in s_values]
 with plt.style.context('science'):
     fig, ax = plt.subplots(figsize=(6,4))
     plot(np.arange(len(path))[150:350], magnon_bands[2][1][150:350], ax=ax, color=red_colors[1], linestyle='-', linewidth=1.5, label=rf"$B={s_values[2]}B_s$")
     plot(np.arange(len(path))[150:350], magnon_bands[2][0][150:350], ax=ax, color=blue_colors[1], linestyle='-', linewidth=1.5)
 
-    ax.axvline(200, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0)
-    ax.axvline(250, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0)
-    ax.axvline(300, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0)
+    ax.axvline(200, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0, alpha=0.5)
+    ax.axvline(250, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0, alpha=0.5)
+    ax.axvline(300, color="gray", ymin=0.07, ymax=0.97, ls = '--' ,linewidth=1.0, alpha=0.5)
     ax.set_xticks([200, 250, 300], [r"$K$", r"$M$", r"$K^\prime$"])
     ax.axis('off')
 
-    ax.annotate("", xytext=(190.5, 15), xy=(210.5, 15),
-            arrowprops=dict(arrowstyle="->"))
-    ax.annotate("", xytext=(290.5, 15), xy=(310.5, 15),
-            arrowprops=dict(arrowstyle="->"))
+    # incident and scattered photons
+    ax.annotate("", xytext=(185.5, 15), xy=(215.5, 15),
+            arrowprops=dict(arrowstyle="->", linewidth=1.5))
+    ax.annotate("", xytext=(285.5, 15), xy=(315.5, 15),
+            arrowprops=dict(arrowstyle="->", linewidth=1.5))
 
-            
+
+    # creation of magnons
     ax.annotate("", xytext=(251, 15), xy=(199, 16.9),
             arrowprops=dict(arrowstyle="->", color=red_colors[1]))
     ax.annotate("", xytext=(249, 15), xy=(301, 16.9),
             arrowprops=dict(arrowstyle="->", color=red_colors[1]))
-    ax.annotate("", xytext=(251, 15.1), xy=(199, 13.1),
+
+    ax.annotate("", xytext=(251, 14.9), xy=(199, 13.1),
             arrowprops=dict(arrowstyle="->", color=blue_colors[1]))
-    ax.annotate("", xytext=(249, 15.1), xy=(301, 13.1),
+    ax.annotate("", xytext=(249, 14.9), xy=(301, 13.1),
             arrowprops=dict(arrowstyle="->", color=blue_colors[1]))
 
+    # polarization
+    draw_circle(ax, center=(200, 15), handedness='R', radius=1.2, turns=0.87,
+                xscale=3, yscale=0.7, phase=np.pi/12, tilde_x=0.1,tilde_y=0.4, color='red')
+    draw_circle(ax, center=(300, 15), handedness='L', radius=1.2, turns=0.87, 
+                xscale=3, yscale=0.7, phase=-np.pi/12, tilde_x=0.1,tilde_y=-0.4, color='blue')
 
-    draw_circle(ax, center=(200, 15), handedness='R', radius=1.2, turns=0.85, xscale=3, yscale=0.7, phase=np.pi/12, color='red')
-    draw_circle(ax, center=(300, 15), handedness='L', radius=1.2, turns=0.85, xscale=3, yscale=0.7, phase=-np.pi/12, color='blue')
+    # magnons at different bands
+    ax.annotate(r"$\beta_{-\bf k}$", xy=(196, 12.3), color='k', size=15)
+    ax.annotate(r"$\beta_{\bf k}$", xy=(296, 12.3), color='k', size=15)
+    ax.annotate(r"$\alpha_{-\bf k}$", xy=(196, 17.4), color='k', size=15)
+    ax.annotate(r"$\alpha_{\bf k}$", xy=(296, 17.4), color='k', size=15)
+
+    # high symmetry points
+    ax.annotate(r"R", xy=(185, 15.5), color='k', size=15)
+    ax.annotate(r"L", xy=(308, 15.5), color='k', size=15)
 
     ax.annotate(r"K", xy=(196, 7.8), color='k', size=20)
     ax.annotate(r"M", xy=(246, 7.8), color='k', size=20)
     ax.annotate(r"K$^\prime$", xy=(296, 7.8), color='k', size=20)
     plt.show()
+    #fig.savefig('figures/concept_maps/setup.png', dpi=600 ,bbox_inches='tight')
 # %%
 
 # %%

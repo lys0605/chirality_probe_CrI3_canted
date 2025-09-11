@@ -74,11 +74,53 @@ for n in range(5):
 letter_annotation(axes[0],0,0.97,r'$\mathrm{(a)}$',size=24)
 letter_annotation(axes[1],-0.035,0.933,r'$\mathrm{(b)}$',size=24)
 letter_annotation(axes[2],-0.035,0.943,r'$\mathrm{(c)}$',size=24)
-letter_annotation(axes[3],-0.01,0.97,r'$\mathrm{(d)}$',size=24)
-letter_annotation(axes[4],-0.01,0.97,r'$\mathrm{(e)}$',size=24)
+letter_annotation(axes[3],-0.04,0.97,r'$\mathrm{(d)}$',size=24)
+letter_annotation(axes[4],-0.02,0.97,r'$\mathrm{(e)}$',size=24)
 fig.subplots_adjust(top=0.99,bottom=0.01,right=0.99,left=0.01)
 
 plt.show()
 fig.savefig('figures/panel_plots/figure2_canted_AFM_topology.png', dpi=300, bbox_inches='tight')
 
+# %%
+# 2x3
+img_raman_cross_section_two_magnon_upper = Image.open('figures/raman_scattering/raman_cross_section_RL_two-magnon_upper.png')
+img_raman_cross_section_AFM_upper = Image.open('figures/raman_scattering/raman_cross_section_RL_AFM_upper.png')
+img_raman_cross_section_FM_upper = Image.open('figures/raman_scattering/raman_cross_section_RL_FM_upper.png')
+img_raman_scattering_two_magnon_upper = Image.open('figures/raman_scattering/two-magnon_process_RL.png')
+img_raman_scattering_AFM_upper = Image.open('figures/raman_scattering/AFM_process_RL.png')
+img_raman_scattering_FM_upper = Image.open('figures/raman_scattering/FM_process_RL.png')
+
+# %%
+Nr = 2
+Nc = 3
+fig, axes = plt.subplots(Nr,Nc,figsize=(20,8),gridspec_kw={'width_ratios': [1, 1,1], 'height_ratios':[1.5,1]})
+fig.subplots_adjust(wspace=0.01,hspace=0)
+axes[0][0].imshow(img_raman_cross_section_two_magnon_upper)
+axes[0][1].imshow(img_raman_cross_section_AFM_upper)
+axes[0][2].imshow(img_raman_cross_section_FM_upper)
+
+axes[1][0].imshow(img_raman_scattering_two_magnon_upper)
+axes[1][1].imshow(img_raman_scattering_AFM_upper)
+axes[1][2].imshow(img_raman_scattering_FM_upper)
+for m in range(Nr):
+    for n in range(Nc):
+        axes[m][n].set_axis_off()
+letter_annotation(axes[0][0],0,0.95,r'$\mathrm{(a)}$',size=20)
+letter_annotation(axes[0][1],0,0.95,r'$\mathrm{(b)}$',size=20)
+letter_annotation(axes[0][2],0,0.95,r'$\mathrm{(c)}$',size=20)
+
+letter_annotation(axes[1][0],-0.085,0.99,r'$\mathrm{(d)}$',size=20)
+letter_annotation(axes[1][1],-0.105,0.99,r'$\mathrm{(e)}$',size=20)
+letter_annotation(axes[1][2],-0.08,0.99,r'$\mathrm{(f)}$',size=20)
+
+# letter_annotation(axes[0][0],0.44,0.97,r'$\mathrm{2M}$',size=25)
+# letter_annotation(axes[0][1],0.44,0.97,r'$\mathrm{AFM}$',size=25)
+# letter_annotation(axes[0][2],0.44,0.97,r'$\mathrm{FM}$',size=25)
+
+fig.subplots_adjust(top=0.98,bottom=0.00,right=1.0,left=0)
+#fig.tight_layout()
+
+plt.show()
+
+fig.savefig("figures/panel_plots/figure3_raman_process_and_cross_section_RL.png", dpi=300)
 # %%

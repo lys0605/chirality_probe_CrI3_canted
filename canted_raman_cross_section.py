@@ -106,10 +106,10 @@ def raman_cross_section_ham(k,qq=0,J=1,D=0.1,S=5/2,B0=0.5):
     # left circularly polarized: (-i,1)/sqrt(2); right circularly polarized: (i,1)/sqrt(2)
     # s: out; s':in
     # e_s^* = e_out , e_s'=e_in
-    e_in_1 = (1/np.sqrt(2))*np.array([-1j*zeta,1]) 
-    e_in_2 = (1/np.sqrt(2))*np.array([1j*zeta,1])
-    e_out_1 = (1/np.sqrt(2))*np.array([-1j*zeta,1])
-    e_out_2 = (1/np.sqrt(2))*np.array([1j*zeta,1])
+    e_in_1 = (1/np.sqrt(2))*np.array([-1j*zeta,1]) # L 
+    e_in_2 = (1/np.sqrt(2))*np.array([1j*zeta,1]) # R
+    e_out_1 = (1/np.sqrt(2))*np.array([-1j*zeta,1]) # R
+    e_out_2 = (1/np.sqrt(2))*np.array([1j*zeta,1]) # L
     
     # if extra phase factors are present
     phi = 0*np.pi # rotated angle around normal
@@ -542,57 +542,95 @@ def get_raman_cross_section_exact(J=1,D=0.1,S=5/2,B0=0.5, f=1):
     berry_array = np.array([berry_p,berry_m])
     berry_rcd_array = np.array([berry_rcd_p,berry_rcd_m])
     energy_array = np.array([energy_upper,energy_lower])
-    return p_array, berry_array, berry_rcd_array, energy_array
+    #return p_array, berry_array, berry_rcd_array, energy_array
+    return p_array
 # %%
 
-# J = 1 # meV
-# D = 0.1 # D/J = 0.1
-# S = 5 # spin number
-# s = 0.6 # saturation field ratio (sin\theta) = B/Bs
+J = 1 # meV
+D = 0.1 # D/J = 0.1
+S = 5 # spin number
+s = 0.74 # saturation field ratio (sin\theta) = B/Bs
 
-# # %% RL
-# s_values = [0.25, 0.5, 0.75, 1]
-# D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
-# raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
-# raman_cross_sections_LR = [np.array(get_raman_cross_section(qq=3,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+# %% RL
+s_values = [0.75,]
+D_values = [0.1]
+#raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+#raman_cross_sections_RR = [np.array(get_raman_cross_section(qq=1,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+#raman_cross_sections_LL = [np.array(get_raman_cross_section(qq=2,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+#raman_cross_sections_LR = [np.array(get_raman_cross_section(qq=3,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
 
-# honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
+honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
-# kx,ky = bzmesh(m=2)
+kx,ky = bzmesh(m=2)
 
-# # %%
-# color_bar_title_RL_upper = [r"$|t_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}^{RL}|^2$",
-#                             r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
-#                             r"$|t_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",] # 2M, FM, AFM
 
-# color_bar_title_RL_lower = [r"$|t_{{\beta}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",
-#                             r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
-#                             r"$|t_{{\beta}^{\prime}\bar{\alpha}^{\prime}^{RL}|^2$",] 
+# %%
+color_bar_title_RL_upper = [r"$|t_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}^{RL}|^2$",
+                            r"$|t_{\alpha^{\prime}\beta}^{RL}|^2$",
+                            r"$|t_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",] # 2M, FM, AFM
 
-# pads = [7, 2, 0]
+color_bar_title_RL_lower = [r"$|t_{{\beta}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",
+                            r"$|t_{\beta}^{\prime}\alpha}^{RL}|^2$",
+                            r"$|t_{{\beta}^{\prime}\bar{\alpha}^{\prime}^{RL}|^2$",] 
 
-# with plt.style.context(['science','ieee']):
-#     fig, axes = panel(figsize=(12,3), nrows=1, ncols=3, width_ratios=[1, 1, 1], height_ratios=[1], hspace=0.1, wspace=0.25)
+title = [r"2M", r"AFM", r"FM"]
 
-#     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+pads = [7, 2, 0]
 
-#     for i in range(3):
-#         pc = axes[i].pcolormesh(kx, ky, raman_cross_sections_RL[3*5+4][2*i], cmap="jet")
+# %%
+intensity = np.array(raman_cross_sections_RL) + np.array(raman_cross_sections_RR) + np.array(raman_cross_sections_LL) + np.array(raman_cross_sections_LR)
+RCD = np.array(raman_cross_sections_RL) + np.array(raman_cross_sections_RR) - np.array(raman_cross_sections_LL) - np.array(raman_cross_sections_LR)
+with plt.style.context(['science','ieee']):
+    fig, axes = panel(figsize=(12,3), nrows=1, ncols=3, width_ratios=[1, 1, 1], height_ratios=[1], hspace=0.1, wspace=0.25)
+
+    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
+    for i in range(3):
+        pc = axes[i].pcolormesh(kx, ky, intensity[0][2*i] , cmap="jet")
         
-#         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
+        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
-#         clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-#         clb.ax.set_title(color_bar_title_RL_upper[i], loc='left', fontsize=16, pad=pads[i])
-#         clb.ax.tick_params(labelsize=16)
+        clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
+        clb.ax.set_title(title[i], loc='left', fontsize=16, pad=pads[i])
+        clb.ax.tick_params(labelsize=16)
 
-#         axes[i].set_axis_on() # make sure the axis is on
-#         axes[i].grid(False) # make sure the grid is off
+        axes[i].set_axis_on() # make sure the axis is on
+        axes[i].grid(False) # make sure the grid is off
 
-#         axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-#         axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
-#         axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-#         axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
+        axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
+        axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
 
-#         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-#         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
-#     plt.show()
+        axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
+        axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+    plt.show()
+# %% single figure
+with plt.style.context(['science','ieee']):
+    fig, axes = panel(figsize=(4,3), nrows=1, ncols=1, width_ratios=[1], height_ratios=[1], hspace=0.1, wspace=0.25)
+
+    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
+
+    for i in range(1):
+        pc = axes.pcolormesh(kx, ky, RCD[0][2*1], cmap="jet")
+        
+        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes, linestyle='-', linewidth=1, color='k')
+
+        clb = fig.colorbar(pc, ax=axes, shrink=0.9)
+        clb.ax.set_title(color_bar_title_RL_upper[1], loc='left', fontsize=16, pad=pads[2])
+        clb.ax.tick_params(labelsize=16)
+
+        axes.set_axis_on() # make sure the axis is on
+        axes.grid(False) # make sure the grid is off
+
+        axes.set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes.set_xticklabels(['-1', '0', '1'], fontsize=16)
+        axes.set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+        axes.set_yticklabels(['-1', '0', '1'], fontsize=16)
+
+        axes.set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
+        axes.set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+        axes.set_title(title[2], fontsize=18)
+    plt.show()
+   #fig.savefig('figures/raman_scattering/raman_cross_section_RL_FM_upper.png', dpi=300)
+# %%

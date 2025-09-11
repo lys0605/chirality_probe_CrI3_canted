@@ -290,8 +290,8 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
 
             # berry curvature
             berry_FM[i,j] = (lambda_k*nu/delta_k-rho*(1-0.5*lambda_k**2/delta_k**2))/(4*delta_k**2)
-            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-1*p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
-            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+1*p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
+            berry_rcd_p[i,j] = -0*2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
+            berry_rcd_m[i,j] = -0*2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
             nu_array[i,j] = delta_k
             rp_array[i,j] = J_p
             sinhp_array[i,j] = xi_p_k
@@ -318,31 +318,32 @@ S = 5 # spin number
 s = 0.75 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
-# s_values = [0.25, 0.50, 0.75, 0.99]
-# D_values = [0.0125,  0.025, 0.05, 0.1,]
-s_values = [0, 0.25, 0.6, 0.75]
-D_values = [0, 0.0125, 0.05, 0.1]
+s_values = [0.25, 0.50, 0.75, 0.99]
+D_values = [0.0125,  0.025, 0.05, 0.1,]
+# s_values = [0, 0.25, 0.6, 0.75]
+# D_values = [0, 0.0125, 0.05, 0.1]
 
 #berry_curvatures = [get_berry_curvature_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
-expanded, exact = map(list, zip(*[get_berry_curvature_exact(J=J, D=D, S=S, B0=s)  for s in s_values for D in D_values]))
+#expanded, exact = map(list, zip(*[get_berry_curvature_exact(J=J, D=D, S=S, B0=s)  for s in s_values for D in D_values]))
+expanded, exact = get_berry_curvature_exact(J=J, D=D, S=S, B0=s)
 # %%
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
 kx,ky = bzmesh(m=2)
 
 # %% ploting 
-color_bar_title = [r"$\Omega_{+}$",r"$\Omega_{-}$"]
-color_bar_title_RCD = [r"$\Omega_{+}^{\text{RCD}}$",r"$\Omega_{-}^{\text{RCD}}$"]
-color_bar_title_2M = [r"$\Omega_{+}^{\text{2M}}$",r"$\Omega_{-}^{\text{2M}}$"]
-color_bar_title_AFM = [r"$\Omega_{+}^{\text{AFM}}$",r"$\Omega_{-}^{\text{AFM}}$"]
-color_bar_title_FM = [r"$\Omega_{+}^{\text{FM}}$",r"$\Omega_{-}^{\text{FM}}$"]
-color_bar_title_noFM = [r"$\Omega_{+}^{\text{noFM}}$",r"$\Omega_{-}^{\text{noFM}}$"]
-color_bar_title_rest = [r"$\Omega_{+}^{\text{Rest}}$",r"$\Omega_{-}^{\text{Rest}}$"]
-color_bar_title_compare = [r"$\Omega_{+}^{\text{2M}^{(0)}}$",r"$\Omega_{+}^{\text{2M}^{(2)}}$"]
+color_bar_title = [r"$\Omega_{\alpha}$",r"$\Omega_{\beta}$"]
+color_bar_title_RCD = [r"$\Omega_{\alpha}^{\text{RCD}}$",r"$\Omega_{\beta}^{\text{RCD}}$"]
+color_bar_title_2M = [r"$\Omega_{\alpha}^{\text{2M}}$",r"$\Omega_{\beta}^{\text{2M}}$"]
+color_bar_title_AFM = [r"$\Omega_{\alpha}^{\text{AFM}}$",r"$\Omega_{\beta}^{\text{AFM}}$"]
+color_bar_title_FM = [r"$\Omega_{\alpha}^{\text{FM}}$",r"$\Omega_{\beta}^{\text{FM}}$"]
+color_bar_title_noFM = [r"$\Omega_{\alpha}^{\text{noFM}}$",r"$\Omega_{\beta}^{\text{noFM}}$"]
+color_bar_title_res = [r"$\Omega_{\alpha}^{\text{Res}}$",r"$\Omega_{\beta}^{\text{Res}}$"]
+color_bar_title_compare = [r"$\Omega_{\alpha}^{\text{2M}^{(0)}}$",r"$\Omega_{\alpha}^{\text{2M}^{(2)}}$"]
 color_bar_title_rho = [r"$\rho^{\text{RL}}$",r"$\tilde{\rho}$"]
-color_bar_title_hyperbolic = [r"$\sinh 2\chi_{+}$",r"$\sinh 2\chi_{-}$"]
-color_bar_title_M = [r"$AM_{+}$",r"$AM_{-}$"]
-color_bar_title_J = [r"$J_{+}$",r"$J_{-}$"]
+color_bar_title_hyperbolic = [r"$\sinh 2\chi_{\alpha}$",r"$\sinh 2\chi_{\beta}$"]
+color_bar_title_M = [r"$AM_{\alpha}$",r"$AM_{-}$"]
+color_bar_title_J = [r"$J_{\alpha}$",r"$J_{-}$"]
 # color_bar_title_exact = [r"$$", r"$-\rho_k^{\text{RL}}\sin 2\psi_k$"]
 
 pads = [7, 7]
@@ -372,21 +373,22 @@ with plt.style.context(['science','ieee']):
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
 # %%#
-print(bz_integration_honeycomb(exact[9][1])/(2*np.pi))
+# print(bz_integration_honeycomb(exact[9][1])/(2*np.pi))
 
 # %%
+pads = [5,5]
 with plt.style.context(['science','ieee']):
     fig, axes = panel(figsize=(4,3), nrows=1, ncols=1, width_ratios=[1], height_ratios=[1], hspace=0.1, wspace=0.4)
 
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(1):
-        pc = axes.pcolormesh(kx, ky, exact[-1][i-1], cmap="jet",) 
+        pc = axes.pcolormesh(kx, ky, exact[0], cmap="jet",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes, linestyle='-', linewidth=1, color='k')
 
         clb = fig.colorbar(pc, ax=axes, shrink=0.9)
-        clb.ax.set_title(color_bar_title[i-1], loc='left', fontsize=16, pad=pads[i])
+        clb.ax.set_title(color_bar_title_res[0], loc='left', fontsize=16, y=1)
         clb.ax.tick_params(labelsize=16)
 
         axes.set_axis_on() # make sure the axis is on
@@ -400,5 +402,5 @@ with plt.style.context(['science','ieee']):
         axes.set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes.set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
-    fig.savefig('figures/berry_curvatures/canted_berry_curvature_lower_exact.png', dpi=300, bbox_inches='tight')
+    fig.savefig('figures/berry_curvatures/canted_berry_curvature_upper_res.png', dpi=300, bbox_inches='tight')
 # %%

@@ -182,8 +182,8 @@ len_w = len(w)
 width = (w[1]-w[0])
 
 # %% finite temperature with initial state as one magnon occupied at lowest band
-#temperatures = [0, 2, 10, 18, 26, 34, 42, 50, 58]
-temperatures = np.linspace(0, 60, 120)
+temperatures = [0, 5, 10, 15, 20, 25, 30, 35, 40,]
+#temperatures = np.linspace(0, 45, 120)
 temp = temperatures[5]
 partition_array = np.array([partition_function(energy_array[0], T=T)*partition_function(energy_array[1], T=T) for T in temperatures])
 
@@ -193,8 +193,8 @@ chi_FM_lower_T = np.zeros((len_T, len_w))
 chi_FM_upper_T = np.zeros((len_T, len_w))
 for j in range(len_T):
     for i in range(len_w):
-        chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1],T=temperatures[j])*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
-        chi_FM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1],T=temperatures[j])*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
+        chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1], T=temperatures[j])*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
+        chi_FM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1], T=temperatures[j])*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
 
 # %% dos weighted CrI3 at zero T
 dos_weighted_FM= np.zeros(len_w)
@@ -204,8 +204,10 @@ for i in range(len_w):
 
 #%%
 print(np.max(energy_array[1]))
-print(np.max(boltzmann_factor(11, T=61)/partition_array))
-print(len_T)
+print(partition_array)
+print(boltzmann_factor(energy_array[1][67,123],T=temperatures[-1]) * partition_array[-1])
+print(boltzmann_factor(energy_array[1][67,123],T=temperatures[4]) * partition_array[4])
+print(temperatures[4])
 # %%
 
 colors_vacuum = ['#00215d', '#0071bc' , '#8fd0ff']
@@ -224,7 +226,7 @@ with plt.style.context(['science','ieee']):
     ax.set_ylabel(rf'$\chi(\omega, T)$', fontsize=11)
     ax.legend( fontsize=9)
     plt.show()
-    #fig.savefig('frequency_resolved_thermal_RCD_CrI3.png', dpi=300, bbox_inches='tight')
+    fig.savefig('frequency_resolved_thermal_RCD_CrI3.png', dpi=300, bbox_inches='tight')
 
 # %%
 with plt.style.context(['science','ieee']):
@@ -339,4 +341,7 @@ gamma_boltzmann = np.array([boltzmann_factor(energy_array[1][67,123],T=temperatu
 #     plt.show()
     #fig.savefig('figures/pump_probe/gap_distance_fm_peak.png', dpi=300, bbox_inches='tight')
 
+# %%
+
+print(max(chi_FM_lower_T[-1]))
 # %%

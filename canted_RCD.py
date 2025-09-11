@@ -348,16 +348,16 @@ def get_RCD_LMC(J=1,D=0.1,S=5/2,B0=0.5,m=0):
     return RCD_array
 
 J = 1 # meV
-D = J/7# D/J = 0.1
+D = 0.1# D/J = 0.1
 S = 5 # spin number; we divided by overall two factor in each term of Hamiltonian, so S=5 to compensate
-s = 0.6 # saturation field ratio (sin\theta) = B/Bs
+s = 0.75 # saturation field ratio (sin\theta) = B/Bs
 
 # %%
-s_values = [0.25, 0.5, 0.6, 0.75, 1]
-D_values = [0.0125, 0.025, 0.05, 0.075, 0.1]
+s_values = [0.75]
+D_values = [0.1]
 
 #RCD = [get_RCD_exact(J=J, D=D, S=S, B0=s) for s in s_values for D in D_values]
-RCD = get_RCD_LMC(J=J, D=D, S=S, B0=0.99)
+RCD = get_RCD_exact(J=J, D=D, S=S, B0=s)
 # %%
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
@@ -365,8 +365,8 @@ kx,ky = bzmesh(m=2)
 
 # %% ploting 
 color_bar_title_upper = [r"$\chi_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}$", 
-                         r"$\chi_{\bar{\beta}^{\prime}\bar{\alpha}}$",
-                         r"$\chi_{{\alpha}^{\prime}\bar{\beta}^{\prime}}$",] # 2M, FM, AFM
+                         r"$\chi_{{\alpha}^{\prime}\bar{\beta}^{\prime}}$",
+                         r"$\chi_{\alpha^{\prime}\beta}$",] # 2M, AFM, FM
 
 color_bar_title_lower = [r"$\chi_{{\beta}^{\prime}\bar{\beta}^{\prime}}$",
                          r"$\chi_{{\alpha}^{\prime}{\beta}}$",
@@ -435,7 +435,12 @@ with plt.style.context(['science','ieee']):
 
         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+        axes[i].set_title(title[i], fontsize=18)
+    letter_annotation(axes[0],-0.25,1,r'$\mathrm{(a)}$',size=18)
+    letter_annotation(axes[1],-0.25,1,r'$\mathrm{(b)}$',size=18)
+    letter_annotation(axes[2],-0.25,1,r'$\mathrm{(c)}$',size=18)
     plt.show()
+    fig.savefig('figures/panel_plots/figure4_RCD_upper.png', dpi=300, bbox_inches='tight')
 # %%
 print(RCD[0].shape)
 # %%
