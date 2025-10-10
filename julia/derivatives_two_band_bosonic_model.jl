@@ -95,32 +95,6 @@ function quantum_metric_two_band_bosonic_formula(kx, ky)
 end
 
 
-function berry_curvature_bosonic_component_formula(kx ,ky)
-    # Calculate the Berry curvature component using the two-band model
-    Hx_12 = u₋L(kx, ky) * H₁(kx, ky) * eigen_vector_2(kx, ky) # 1 for lower
-    Hx_21 = u₊L(kx, ky) * H₁(kx, ky) * eigen_vector_1(kx, ky)
-    Hy_12 = u₋L(kx, ky) * H₂(kx, ky) * eigen_vector_2(kx, ky)
-    Hy_21 = u₊L(kx, ky) * H₂(kx, ky) * eigen_vector_1(kx, ky)
-    Ω₁ = imag((Hx_12 * Hy_21 - Hy_12 * Hx_21)/ ((E₁(kx, ky) - E₂(kx, ky))^2))
-    Ω₂ = imag((Hx_21 * Hy_12 - Hy_21 * Hx_12)/ ((E₁(kx, ky) - E₂(kx, ky))^2))
-    return Ω₁
-end
-
-
-function quantum_metric_bosonic_component_formula(kx ,ky)
-    # Calculate the Berry curvature component using the two-band model
-    Hx_12 = u₋L(kx, ky) * H₁(kx, ky) * eigen_vector_2(kx, ky) # 1 for lower (actually upper)
-    Hx_21 = u₊L(kx, ky) * H₁(kx, ky) * eigen_vector_1(kx, ky)
-    Hy_12 = u₋L(kx, ky) * H₂(kx, ky) * eigen_vector_2(kx, ky)
-    Hy_21 = u₊L(kx, ky) * H₂(kx, ky) * eigen_vector_1(kx, ky)
-
-    g_11 = real((Hx_12 * Hx_21)/ ((E₁(kx, ky) - E₂(kx, ky))^2))
-    g_12 = real((Hx_12 * Hy_21)/ ((E₁(kx, ky) - E₂(kx, ky))^2))
-    g_21 = real((Hy_12 * Hx_21)/ ((E₁(kx, ky) - E₂(kx, ky))^2)) 
-    g_22 = real((Hy_12 * Hy_21)/ ((E₁(kx, ky) - E₂(kx, ky))^2))
-    return g_22
-end
-
 # General parameters for two band model
 τ₃ = [1 0; 0 -1] # Pauli matrix across particle-hole space
 d_abs(kx, ky) = sqrt(d₀(kx, ky)^2 - d₁(kx, ky)^2 - d₂(kx, ky)^2)
@@ -131,10 +105,8 @@ eigen_vector_1(kx, ky) = [-coshψ(kx, ky) * phase_φ(kx, ky) , sinhψ(kx, ky)]
 eigen_vector_2(kx, ky) = [sinhψ(kx, ky) * phase_φ(kx, ky) , -coshψ(kx, ky)]
 U_k(kx, ky) = [eigen_vector_1(kx, ky) eigen_vector_2(kx, ky)]
 U_k_inv(kx, ky) = τ₃ * transpose(conj(U_k(kx, ky))) * τ₃
-u₋L(kx, ky) = transpose(U_k_inv(kx, ky)[1, :]) # <u₋ᴸ| 
-u₊L(kx, ky) = transpose(U_k_inv(kx, ky)[2, :]) # <u₊ᴸ|
-
-
+u₊L(kx, ky) = transpose(U_k_inv(kx, ky)[1, :]) # <u₊ᴸ| 
+u₋L(kx, ky) = transpose(U_k_inv(kx, ky)[2, :]) # <u₋ᴸ|
 
 # Derivatives of the Hamiltonian or your model
 H₁(kx, ky) = ForwardDiff.derivative(kx -> two_band_bosonic_model(kx, ky), kx)
@@ -147,6 +119,19 @@ L̃_11(kx, ky) = transpose(conj(U_k(kx, ky))) * τ₃ * H₁₁(kx, ky) * U_k(kx
 L̃_12(kx, ky) = transpose(conj(U_k(kx, ky))) * τ₃ * H₁₂(kx, ky) * U_k(kx, ky)
 L̃_21(kx, ky) = transpose(conj(U_k(kx, ky))) * τ₃ * H₂₁(kx, ky) * U_k(kx, ky)
 L̃_22(kx, ky) = transpose(conj(U_k(kx, ky))) * τ₃ * H₂₂(kx, ky) * U_k(kx, ky)
+
+# Quantum geometric components in terms of derivatives of Hamiltonian
+# 1 for upper; 2 for lower
+Hx_12(kx,ky) = u₊L(kx, ky) * H₁(kx, ky) * eigen_vector_2(kx, ky) # ⟨u₊ᴸ| ∂H/∂kx |u₋ᴿ⟩
+Hx_21(kx,ky) = u₋L(kx, ky) * H₁(kx, ky) * eigen_vector_1(kx, ky) # ⟨u₋ᴸ| ∂H/∂kx |u₊ᴿ⟩
+Hy_12(kx,ky) = u₊L(kx, ky) * H₂(kx, ky) * eigen_vector_2(kx, ky) # ⟨u₊ᴸ| ∂H/∂ky |u₋ᴿ⟩
+Hy_21(kx,ky) = u₋L(kx, ky) * H₂(kx, ky) * eigen_vector_1(kx, ky) # ⟨u₋ᴸ| ∂H/∂ky |u₊ᴿ⟩
+quantum_metric_11(kx,ky) = real((Hx_12(kx, ky) * Hx_21(kx, ky))/ ((E₁(kx, ky) - E₂(kx, ky))^2))
+quantum_metric_12(kx,ky) = real((Hx_12(kx, ky) * Hy_21(kx, ky))/ ((E₁(kx, ky) - E₂(kx, ky))^2))
+quantum_metric_21(kx,ky) = real((Hy_12(kx, ky) * Hx_21(kx, ky))/ ((E₁(kx, ky) - E₂(kx, ky))^2)) 
+quantum_metric_22(kx,ky) = real((Hy_12(kx, ky) * Hy_21(kx, ky))/ ((E₁(kx, ky) - E₂(kx, ky))^2))
+Ω₁(kx,ky) = imag((Hx_12(kx,ky) * Hy_21(kx,ky) - Hy_12(kx,ky) * Hx_21(kx,ky))/ ((E₁(kx, ky) - E₂(kx, ky))^2))
+Ω₂(kx,ky) = imag((Hx_21(kx,ky) * Hy_12(kx,ky) - Hy_21(kx,ky) * Hx_12(kx,ky))/ ((E₁(kx, ky) - E₂(kx, ky))^2))
 
 # Eigenvalues and Eigenvectors of the Hamiltonian; and their Derivatives
 E₁(kx, ky) = eigvals(two_band_bosonic_model(kx, ky))[1] # lower 
@@ -178,9 +163,9 @@ K = 2π*[2/3,0]/√3 #K
 K′ = rot * K
 
 # Hamiltonian, eigenvalues and eigenvectors
-H =  [two_band_bosonic_model(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
-eigenvalues = [eigvals(H[i, j]) for i in 1:Nx, j in 1:Ny]
-eigenvectors = [eigvecs(H[i, j]) for i in 1:Nx, j in 1:Ny]
+H_M =  [two_band_bosonic_model(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+eigenvalues = [eigvals(H_M[i, j]) for i in 1:Nx, j in 1:Ny]
+eigenvectors = [eigvecs(H_M[i, j]) for i in 1:Nx, j in 1:Ny]
 lower_band = getindex.(eigenvalues, 1) # in python, use np.vectorize(lambda v:v[i])(bands) to get i-th bands ; or simply write loops
 upper_band = getindex.(eigenvalues, 2)
 
@@ -212,8 +197,8 @@ d3_derivative_ky = [∂d₃_∂ky(kx[i], ky[j]) for i in 1:length(kx), j in 1:le
 
 
 # geometric quantities
-Ω = [berry_curvature_bosonic_component_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
-#Ω = [berry_curvature_two_band_bosonic_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+Ω₊ = [Ω₁(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+Ω₋ = [Ω₂(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 r_11 = [L̃_11(kx[i], ky[j])[1,2]  for i in 1:Nx, j in 1:Ny]
 r_12 = [L̃_12(kx[i], ky[j])[1,2]  for i in 1:Nx, j in 1:Ny]
 r_21 = [L̃_21(kx[i], ky[j])[1,2]  for i in 1:Nx, j in 1:Ny]
@@ -225,10 +210,10 @@ gap = [d_abs(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 h_z = [d₃(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 
 # quantum metric 
-g_11 = [quantum_metric_bosonic_component_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
-g_12 = [quantum_metric_bosonic_component_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
-g_21 = [quantum_metric_bosonic_component_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
-g_22 = [quantum_metric_bosonic_component_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+g_11 = [quantum_metric_11(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+g_12 = [quantum_metric_12(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+g_21 = [quantum_metric_21(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
+g_22 = [quantum_metric_22(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 
 g_formula_11 = [quantum_metric_two_band_bosonic_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
 g_formula_12 = [quantum_metric_two_band_bosonic_formula(kx[i], ky[j]) for i in 1:Nx, j in 1:Ny]
@@ -256,38 +241,39 @@ fig = Figure()
 # ax1 = Axis3(fig[1, 1], title="Energy bands", xlabel="kx", ylabel="ky")
 # surface!(ax1, kx, ky, real(upper_band),  colormap=:winter, alpha=0.5)
 # surface!(ax1, kx, ky, -real(lower_band),  colormap=:dense, alpha=0.5)
-ax_heat_1 = Axis(fig[1, 1], title=L"\textbf{Quantum metric} $2g_{μν}\Delta_{g}^2$", 
+ax_heat_1 = Axis(fig[1, 1], title=L"\textbf{Quantum metric} $\frac{1}{2}\Delta_{+-}^2g_{xy}$", 
                 aspect=DataAspect() , xlabel=L"k_x", ylabel=L"k_y", 
                 xlabelsize=18, ylabelsize=18)
-hm_1 = heatmap!(ax_heat_1, kx, ky,  2*gap.^2 .* g_12, colormap=:viridis)
+hm_1 = heatmap!(ax_heat_1, kx, ky,  2 .* gap.^2 .* (g_12), colormap=:viridis)
 poly!(ax_heat_1, Point2f[K, rot * K, rot^2 * K, rot^3 * K, rot^4 *K, rot^5 * K], color=(:black, 0), alpha=0.5, strokecolor=:black, strokewidth=1)
-Colorbar(fig[1, 2,] , hm_1, label="Energy (meV)")
+Colorbar(fig[1, 2,] , hm_1, label="")
 
 ax_heat_2 = Axis(fig[1, 3], title=L"\textbf{Berry curvature} $\Omega_{xy}$", 
                 aspect=DataAspect() , xlabel=L"k_x", ylabel=L"k_y",
                 xlabelsize=18, ylabelsize=18)
-hm_2 = heatmap!(ax_heat_2, kx, ky, Ω, colormap=:viridis)
+hm_2 = heatmap!(ax_heat_2, kx, ky, Ω₋, colormap=:viridis)
 poly!(ax_heat_2, Point2f[K, rot * K, rot^2 * K, rot^3 * K, rot^4 * K, rot^5 * K], color=(:black, 0), alpha=0.5, strokecolor=:black, strokewidth=1)
-Colorbar(fig[1, 4], hm_2, label="Energy (meV)")
+Colorbar(fig[1, 4], hm_2, label="")
 
-ax_heat_3 = Axis(fig[2, 1], title=L"\textbf{LMCs} $L_{\mu\nu}$", 
+ax_heat_3 = Axis(fig[2, 1], title=L"\textbf{LD (Diagonal-anti-diagonal)} ", 
                 aspect=DataAspect() , xlabel=L"k_x", ylabel=L"k_y",
                 xlabelsize=18, ylabelsize=18)
 hm_3 = heatmap!(ax_heat_3, kx, ky, LD, colormap=:viridis)
 poly!(ax_heat_3, Point2f[K, rot * K, rot^2 * K, rot^3 * K, rot^4 * K, rot^5 * K], color=(:black, 0), alpha=0.5, strokecolor=:black, strokewidth=1)
-Colorbar(fig[2, 2], hm_3, label="Energy (meV)")
+Colorbar(fig[2, 2], hm_3, label="")
 
-ax_heat_4 = Axis(fig[2, 3], title=L"2*(g_\mu\nu)\Delta_g^2 - L_{\mu\nu}", 
+ax_heat_4 = Axis(fig[2, 3], title=L"\textbf{Difference}", 
                 aspect=DataAspect() , xlabel=L"k_x", ylabel=L"k_y",
                 xlabelsize=18, ylabelsize=18)
-hm_4 = heatmap!(ax_heat_4, kx, ky, LD_xx_yy .- 2*(g_11-g_22).*gap.^2, colormap=:viridis)
+hm_4 = heatmap!(ax_heat_4, kx, ky, LD .- 2*(g_12).*gap.^2, colormap=:viridis)
 poly!(ax_heat_4, Point2f[K, rot * K, rot^2 * K, rot^3 * K, rot^4 * K, rot^5 * K], color=(:black, 0), alpha=0.5, strokecolor=:black, strokewidth=1)
-Colorbar(fig[2, 4], hm_4, label="Energy (meV)")
+Colorbar(fig[2, 4], hm_4, label="")
 #surface!(ax1, kx, ky, upper_band, colormap=:plasma)
 #surface!(ax1, kx, ky, zeros(100,100) , colormap=:darkterrain, alpha=0.1)
-ax1.azimuth[] = π/4     # Horizontal rotation (radians)
-ax1.elevation[] = π/16  # Vertical tilt (radians)
-fig 
+# ax1.azimuth[] = π/4     # Horizontal rotation (radians)
+# ax1.elevation[] = π/16  # Vertical tilt (radians)
+fig
+save("julia/figures/quantum_metric_linear_dichroism_diagonal_anti-diagonal_collinear_afm_honeycomb.png", fig, px_per_unit = 300/96)
 
 # Integration within first BZ 
 honeycomb = Polygon(Point2f[K, rot * K, rot^2 * K, rot^3 * K, rot^4 * K, rot^5 * K])
