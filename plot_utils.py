@@ -67,7 +67,7 @@ def panel(figsize=(8,6), nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1
 
 def panel_unequal(figsize=(8,6), nrows=2, ncols=2, width_ratios=[1, 1], height_ratios=[1, 1], hspace=0, wspace=0):
     """
-    Creating a panel of subplots with equal aspect ratio and no space between subplots.
+    Creating a panel of subplots with unequal aspect ratio and no space between subplots.
 
     Parameters:
         figsize (tuple): Figure size.

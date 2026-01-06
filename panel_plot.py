@@ -124,3 +124,156 @@ plt.show()
 
 fig.savefig("figures/panel_plots/figure3_raman_process_and_cross_section_RL.png", dpi=300)
 # %%
+# 2x2
+img_canted_berry_rcd_lower = Image.open('figures/berry_curvatures/canted_berry_curvature_lower_RCD.png')
+img_canted_berry_rcd_upper = Image.open('figures/berry_curvatures/canted_berry_curvature_upper_RCD.png')
+img_chern_rcd_lower = Image.open('figures/chern_numbers/canted_Chern_RCD_lower.png')
+img_chern_rcd_upper = Image.open('figures/chern_numbers/canted_Chern_RCD_upper.png')
+
+Nr = 2
+Nc = 2
+fig, axes = plt.subplots(Nr,Nc,figsize=(12.5,9),gridspec_kw={'width_ratios': [1, 1]})
+
+plt.tight_layout() # fix the layout first
+fig.subplots_adjust(wspace=-0.05, hspace=-0.01) # fix the spacing
+
+# first row
+axes[0][0].imshow(img_canted_berry_rcd_lower)
+pos_00_1 = axes[0][0].get_position() # get the original position 
+pos_00_2 = [pos_00_1.x0+0.0055, pos_00_1.y0 , pos_00_1.width, pos_00_1.height]
+axes[0][0].set_position(pos_00_2) # set a new position
+
+axes[0][1].imshow(img_canted_berry_rcd_upper)
+pos_01_1 = axes[0][1].get_position() # get the original position 
+pos_01_2 = [pos_01_1.x0+0.0015 , pos_01_1.y0 , pos_01_1.width, pos_01_1.height] 
+axes[0][1].set_position(pos_01_2) # set a new position
+
+# second row
+axes[1][0].imshow(img_chern_rcd_lower)
+axes[1][1].imshow(img_chern_rcd_upper)
+
+for m in range(Nr):
+    for n in range(Nc):
+        axes[m][n].set_axis_off()
+letter_annotation(axes[0][0],0,0.97,r'$\mathrm{(a)}$',size=20)
+letter_annotation(axes[0][1], 0, 0.97,r'$\mathrm{(b)}$',size=20)
+letter_annotation(axes[1][0], 0.001, 0.97,r'$\mathrm{(c)}$',size=20)
+letter_annotation(axes[1][1], -0.005, 0.97,r'$\mathrm{(d)}$',size=20)
+
+
+plt.show()
+fig.savefig("figures/panel_plots/figure5_berry_curvature_rcd", dpi=300, bbox_inches='tight')
+# %%
+# 2x4
+img_canted_berry_noFM_lower = Image.open('figures/berry_curvatures/canted_berry_curvature_lower_noFM.png')
+img_canted_berry_noFM_upper = Image.open('figures/berry_curvatures/canted_berry_curvature_upper_noFM.png')
+img_canted_berry_FM_only_lower = Image.open('figures/berry_curvatures/canted_berry_curvature_lower_FM.png')
+img_canted_berry_FM_only_upper = Image.open('figures/berry_curvatures/canted_berry_curvature_upper_FM.png')
+
+img_chern_no_FM_lower = Image.open('figures/chern_numbers/canted_Chern_number_lower_RCD_noFM.png')
+img_chern_no_FM_upper = Image.open('figures/chern_numbers/canted_Chern_number_upper_RCD_noFM.png')
+img_chern_FM_only_lower = Image.open('figures/chern_numbers/canted_Chern_number_lower_RCD_FM.png')
+img_chern_FM_only_upper = Image.open('figures/chern_numbers/canted_Chern_number_upper_RCD_FM.png')
+
+Nr = 2
+Nc = 4
+fig, axes = plt.subplots(Nr,Nc,figsize=(24,9),gridspec_kw={'width_ratios': [1, 1, 1, 1]})
+
+plt.tight_layout() # fix the layout first
+fig.subplots_adjust(wspace=-0.01,hspace=-0.01) # fix the spacing
+
+axes[0][0].imshow(img_canted_berry_noFM_lower)
+pos_00_1 = axes[0][0].get_position() # get the original position 
+pos_00_2 = [pos_00_1.x0+0.001, pos_00_1.y0, pos_00_1.width, pos_00_1.height] 
+axes[0][0].set_position(pos_00_2) # set a new position
+
+axes[0][1].imshow(img_canted_berry_noFM_upper)
+pos_01_1 = axes[0][1].get_position() # get the original position 
+pos_01_2 = [pos_01_1.x0+0.0055, pos_01_1.y0, pos_01_1.width, pos_01_1.height] 
+axes[0][1].set_position(pos_01_2) # set a new position
+
+axes[0][2].imshow(img_canted_berry_FM_only_lower)
+pos_02_1 = axes[0][2].get_position() # get the original position 
+pos_02_2 = [pos_02_1.x0+0.0055, pos_02_1.y0, pos_02_1.width, pos_02_1.height] 
+axes[0][2].set_position(pos_02_2) # set a new position
+
+axes[0][3].imshow(img_canted_berry_FM_only_upper)
+pos_03_1 = axes[0][3].get_position() # get the original position 
+pos_03_2 = [pos_03_1.x0+0.0015, pos_03_1.y0, pos_03_1.width, pos_03_1.height] 
+axes[0][3].set_position(pos_03_2) # set a new position
+
+# axes[1][0].imshow(img_chern_rcd_only_lower)
+# axes[1][1].imshow(img_chern_rcd_only_upper)
+axes[1][0].imshow(img_chern_no_FM_lower)
+axes[1][1].imshow(img_chern_no_FM_upper)
+axes[1][2].imshow(img_chern_FM_only_lower)
+axes[1][3].imshow(img_chern_FM_only_upper)
+for m in range(Nr):
+    for n in range(Nc):
+        axes[m][n].set_axis_off()
+letter_annotation(axes[0][0],0,0.97,r'$\mathrm{(a)}$',size=24)
+letter_annotation(axes[0][1],0,0.97,r'$\mathrm{(b)}$',size=24)
+letter_annotation(axes[0][2],0,0.97,r'$\mathrm{(c)}$',size=24)
+letter_annotation(axes[0][3],0,0.97,r'$\mathrm{(d)}$',size=24)
+letter_annotation(axes[1][0],0.023,0.97,r'$\mathrm{(e)}$',size=24)
+letter_annotation(axes[1][1],0.024,0.975,r'$\mathrm{(f)}$',size=24)
+letter_annotation(axes[1][2],0.023,0.98,r'$\mathrm{(g)}$',size=24)
+letter_annotation(axes[1][3],0.024,0.97,r'$\mathrm{(h)}$',size=24)
+
+
+plt.show()
+fig.savefig("figures/panel_plots/figure6_chern_curvature_noFM_FM.png",dpi=300, bbox_inches = "tight")
+# %%
+# 2x2 CrI3
+img_set_up_CrI3 = Image.open('figures/set_up_CrI3.png')
+img_CrI3_bands = Image.open('figures/CrI3_bands/CrI3_band_structure.png')
+img_CrI3_berry_curvature_upper = Image.open('figures/CrI3_berry_curvatures/CrI3_berry_curvature_upper.png')
+img_CrI3_berry_curvature_lower = Image.open('figures/CrI3_berry_curvatures/CrI3_berry_curvature_lower.png')
+
+Nr = 2
+Nc = 2
+fig, axes = panel(figsize=(8,6), 
+                  nrows=Nr, ncols=Nc, 
+                  width_ratios=[1, 1], height_ratios=[1, 1], 
+                  hspace=0, wspace=0)
+plt.tight_layout() # fix the layout first
+fig.subplots_adjust(wspace=0.05, hspace=-0.01) # fix the spacing
+# ax1 = fig.add_subplot(gs[0, 0])  # setup
+# ax2 = fig.add_subplot(gs[0, 1])  # bands
+# ax3 = fig.add_subplot(gs[1, :])  # berry curvatures
+
+# first row
+axes[0,0].imshow(img_set_up_CrI3)
+pos_00_1 = axes[0,0].get_position() # get the original position 
+pos_00_2 = [pos_00_1.x0+0.0055, pos_00_1.y0 , pos_00_1.width, pos_00_1.height]
+axes[0][0].set_position(pos_00_2) # set a new position
+
+axes[0,1].imshow(img_CrI3_bands)
+pos_01_1 = axes[0,1].get_position() # get the original position 
+pos_01_2 = [pos_01_1.x0+0.0015 , pos_01_1.y0 , pos_01_1.width, pos_01_1.height] 
+axes[0,1].set_position(pos_01_2) # set a new position
+
+# second row
+axes[1,0].imshow(img_CrI3_berry_curvature_upper)
+pos_10_1 = axes[1,0].get_position() # get the original position
+pos_10_2 = [pos_10_1.x0+0.0055 , pos_10_1.y0 , pos_10_1.width, pos_10_1.height]
+axes[1,0].set_position(pos_10_2) # set a new position
+
+axes[1,1].imshow(img_CrI3_berry_curvature_lower)
+pos_11_1 = axes[1,1].get_position() # get the original position
+pos_11_2 = [pos_11_1.x0+0.0055 , pos_11_1.y0 , pos_11_1.width, pos_11_1.height]
+axes[1,1].set_position(pos_11_2) # set a new position
+
+for m in range(Nr):
+    for n in range(Nc):
+        axes[m][n].set_axis_off()
+
+letter_annotation(axes[0][0],0,1.27,r'$\mathrm{(a)}$',size=20)
+letter_annotation(axes[0][1], -0.022, 0.97,r'$\mathrm{(b)}$',size=20)
+letter_annotation(axes[1][0], -0.0523, 0.97,r'$\mathrm{(c)}$',size=20)
+letter_annotation(axes[1][1], -0.0523, 0.97,r'$\mathrm{(d)}$',size=20)
+
+
+plt.show()
+fig.savefig("figures/panel_plots/figure1_CrI3_set_up", dpi=300, bbox_inches='tight')
+# %%

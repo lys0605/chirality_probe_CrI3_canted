@@ -427,7 +427,6 @@ with plt.style.context(['science','ieee']):
 
         axes[i].set_axis_on() # make sure the axis is on
         axes[i].grid(False) # make sure the grid is off
-
         axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
         axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
         axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
@@ -436,11 +435,11 @@ with plt.style.context(['science','ieee']):
         axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
         axes[i].set_title(title[i], fontsize=18)
-    letter_annotation(axes[0],-0.25,1,r'$\mathrm{(a)}$',size=18)
-    letter_annotation(axes[1],-0.25,1,r'$\mathrm{(b)}$',size=18)
-    letter_annotation(axes[2],-0.25,1,r'$\mathrm{(c)}$',size=18)
+    # letter_annotation(axes[0],-0.25,1,r'$\mathrm{(a)}$',size=18)
+    # letter_annotation(axes[1],-0.25,1,r'$\mathrm{(b)}$',size=18)
+    # letter_annotation(axes[2],-0.25,1,r'$\mathrm{(c)}$',size=18)
     plt.show()
-    fig.savefig('figures/panel_plots/figure4_RCD_upper.png', dpi=300, bbox_inches='tight')
+    # fig.savefig('figures/panel_plots/figure4_RCD_upper.png', dpi=300, bbox_inches='tight')
 # %%
 print(RCD[0].shape)
 # %%

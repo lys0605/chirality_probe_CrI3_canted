@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -5,9 +6,9 @@ from plot_utils import plot, letter_annotation, panel
 from mathfuntion import Im, Re, is_invertible
 import scienceplots
 
-mpl.rcParams['xtick.labelsize'] = 20
-mpl.rcParams['ytick.labelsize'] = 20
-mpl.rcParams['axes.labelsize'] = 22
+mpl.rcParams['xtick.labelsize'] = 24
+mpl.rcParams['ytick.labelsize'] = 24
+mpl.rcParams['axes.labelsize'] = 24
 
 dot = np.vectorize(np.dot,signature='(n),(m)->()')
 
@@ -148,8 +149,8 @@ red_colors = ['#ffc883', '#ff9f4d', '#ff6f00', '#c94c00', '#7f2e00'] # red color
 #%%
 with plt.style.context('science'):
     fig, ax = plt.subplots(figsize=(6,4))
-    plot(np.arange(len(path)), magnon_bands[1], ax=ax, color=blue_colors[0], linestyle='-', linewidth=1, label=r"$\epsilon_{\bf k, -}$")
-    plot(np.arange(len(path)), magnon_bands[0], ax=ax, color=red_colors[0], linestyle='-', linewidth=1, label=r"$\epsilon_{\bf k,+}$")
+    plot(np.arange(len(path)), magnon_bands[1], ax=ax, color=blue_colors[0], linestyle='-', linewidth=1, label=r"$\epsilon_{\bf k -}$")
+    plot(np.arange(len(path)), magnon_bands[0], ax=ax, color=red_colors[0], linestyle='-', linewidth=1, label=r"$\epsilon_{\bf k +}$")
 
     for i in range(len(k_index)-2):  
         ax.axvline(k_index[i+1], color="black", ls = '-' ,linewidth=1.0)
@@ -159,14 +160,16 @@ with plt.style.context('science'):
     ax.set_xlim(0,len(path)) 
     ax.set_ylim(0,22) 
     ax.set_in_layout(True)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.62,0.01), fontsize=14, frameon=True)
-    ax.set_ylabel(r"$\epsilon$ (meV)")\
+    ax.legend(loc="lower center", bbox_to_anchor=(0.62,0.01), fontsize=18, frameon=True)
+    ax.set_ylabel(r"$\epsilon$ (meV)")
     # $\mathrm{(meV)}$
     fig.tight_layout()
     plt.show()
-#fig.savefig('figures/canted_energy_bands/canted_afm_band_structure.png', dpi=600 ,bbox_inches='tight')
+fig.savefig('figures/CrI3_bands/CrI3_band_structure.png', dpi=300 ,bbox_inches='tight')
 #
 
 # %%
 print(np.min(magnon_bands[1]))
+# %%
+
 # %%

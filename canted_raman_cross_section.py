@@ -194,8 +194,8 @@ def raman_cross_section_ham(k,qq=0,J=1,D=0.1,S=5/2,B0=0.5):
                         [0,(1-v)*gkb_11,g0_11-fk_11,-v*gkb_11],[(1-v)*gk_11,0,-v*gk_11,g0_11+fk_11]])
     
     # LL (actually RR)
-    ramham12 = np.array([[g0_12+fk_12,-v*gkb_11,0,(1-v)*gkb_12],[-v*gk_12,g0_12-fk_12,(1-v)*gk_12,0],
-                        [0,(1-v)*gkb_12,g0_12-fk_12,-v*gkb_12],[(1-v)*gk_12,0,-v*gk_12,g0_11+fk_12]])
+    ramham12 = np.array([[g0_12+fk_12,-v*gkb_12,0,(1-v)*gkb_12],[-v*gk_12,g0_12-fk_12,(1-v)*gk_12,0],
+                        [0,(1-v)*gkb_12,g0_12-fk_12,-v*gkb_12],[(1-v)*gk_12,0,-v*gk_12,g0_12+fk_12]])
     
     # RR (actually LL)
     ramham21 = np.array([[g0_21+fk_21,-v*gkb_21,0,(1-v)*gkb_21],[-v*gk_21,g0_21-fk_21,(1-v)*gk_21,0],
@@ -554,10 +554,10 @@ s = 0.74 # saturation field ratio (sin\theta) = B/Bs
 # %% RL
 s_values = [0.75,]
 D_values = [0.1]
-#raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
-#raman_cross_sections_RR = [np.array(get_raman_cross_section(qq=1,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
-#raman_cross_sections_LL = [np.array(get_raman_cross_section(qq=2,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
-#raman_cross_sections_LR = [np.array(get_raman_cross_section(qq=3,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+raman_cross_sections_RR = [np.array(get_raman_cross_section(qq=1,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+raman_cross_sections_LL = [np.array(get_raman_cross_section(qq=2,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
+raman_cross_sections_LR = [np.array(get_raman_cross_section(qq=3,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
 
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
 
@@ -586,7 +586,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(3):
-        pc = axes[i].pcolormesh(kx, ky, intensity[0][2*i] , cmap="jet")
+        pc = axes[i].pcolormesh(kx, ky, RCD[0][2*i+1] , cmap="jet")
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 

@@ -232,7 +232,7 @@ D = 0.31 # DMI meV
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
 
-CrI3_berry_curvatures = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S, n=200) 
+CrI3_berry_curvatures = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=J1/10, Az=Az, S=S, n=200) 
 #CrI3_quantum_metrics = get_FM_quantum_metric(J1=J1, J2=J2, J3=J3, D=0, Az=Az, S=S, n=200)
 # %%
 honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
@@ -254,33 +254,31 @@ color_bar_title_M = [r"$AM_{+}$",r"$AM_{-}$"]
 color_bar_title_J = [r"$J_{+}$",r"$J_{-}$"]
 # color_bar_title_exact = [r"$$", r"$-\rho_k^{\text{RL}}\sin 2\psi_k$"]
 
-pads = [7, 7]
+pads = [7, 10]
 with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(8,3), nrows=1, ncols=2, width_ratios=[1,1], height_ratios=[1], hspace=0.1, wspace=0.4)
+    fig, ax = panel(figsize=(4,3), nrows=1, ncols=1, width_ratios=[1], height_ratios=[1], hspace=0.1, wspace=0.4)
 
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
-    for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, CrI3_berry_curvatures[i], cmap="jet",) 
-        
-        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
+    pc = ax.pcolormesh(kx, ky, CrI3_berry_curvatures[1], cmap="jet",) 
+    
+    plot(honeycomb_bz_x, honeycomb_bz_y, ax=ax, linestyle='-', linewidth=1, color='k')
 
-        clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(color_bar_title_FM[i], loc='left', fontsize=16, pad=pads[i])
-        clb.ax.tick_params(labelsize=16)
+    clb = fig.colorbar(pc, ax=ax, shrink=0.9)
+    clb.ax.set_title(color_bar_title[1], loc='left', fontsize=16, pad=pads[1])
+    clb.ax.tick_params(labelsize=16)
+    ax.set_axis_on() # make sure the axis is on
+    ax.grid(False) # make sure the grid is off
 
-        axes[i].set_axis_on() # make sure the axis is on
-        axes[i].grid(False) # make sure the grid is off
+    ax.set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+    ax.set_xticklabels(['-1', '0', '1'], fontsize=16)
+    ax.set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
+    ax.set_yticklabels(['-1', '0', '1'], fontsize=16)
 
-        axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
-        axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
-
-        axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-        axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+    ax.set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
+    ax.set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
-# %%#
-print(bz_integration_honeycomb(CrI3_berry_curvatures[0], n=200)/(2*np.pi))
+# %%
+fig.savefig('figures/CrI3_berry_curvatures/CrI3_berry_curvature_lower.png', dpi=300 ,bbox_inches='tight')
 
 # %%

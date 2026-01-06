@@ -153,8 +153,8 @@ def get_berry_curvature(J=1, D=0.1, S=5/2, B0=0.5):
             p_14[i,j] = a**2*nu*cosDouble*(p_14_1+p_14_2)+rho*sigma_k
             
             # berry curvature
-            berry_rcd_p[i,j] = -2*(0*p_13[i,j]/(ep+ep)**2+0*p_14[i,j]/(ep+em)**2-1*p_12[i,j]/(em-ep)**2)+0*2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
-            berry_rcd_m[i,j] = -2*(0*p_24[i,j]/(em+em)**2+0*p_14[i,j]/(ep+em)**2+1*p_12[i,j]/(ep-em)**2)-0*2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
+            berry_rcd_p[i,j] = -2*(1*p_13[i,j]/(ep+ep)**2+1*p_14[i,j]/(ep+em)**2-1*p_12[i,j]/(em-ep)**2)+0*2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
+            berry_rcd_m[i,j] = -2*(1*p_24[i,j]/(em+em)**2+1*p_14[i,j]/(ep+em)**2+1*p_12[i,j]/(ep-em)**2)-0*2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
             
         if i%50 == 0:
                 print(f'Iteration {i}: B={B0:.2f}, D={D:.3f}: done')
@@ -190,14 +190,17 @@ s = 0.6 # saturation field ratio (sin\theta) = B/Bs
 s_values = np.linspace(-1.0, 1.0, num=11)
 D_values = np.linspace(-0.1, 0.1, num=11)
 
-C_p = np.zeros((s_values.size, D_values.size))
-C_m = np.zeros((s_values.size, D_values.size))
+# C_p = np.zeros((s_values.size, D_values.size))
+# C_m = np.zeros((s_values.size, D_values.size))
+C_p_RCD = np.zeros((s_values.size, D_values.size))
+C_m_RCD = np.zeros((s_values.size, D_values.size))
 
 for i in range(s_values.size):
     for j in range(D_values.size):
-        C_p[i,j], C_m[i,j] = get_chern_number(J=J, D=D_values[j], S=S, B0=s_values[i])
-       
-Cherns = np.array([C_p, C_m])
+        C_p_RCD[i,j], C_m_RCD[i,j] = get_chern_number(J=J, D=D_values[j], S=S, B0=s_values[i])
+
+#Cherns = np.array([C_p, C_m])       
+Cherns_RCD = np.array([C_p_RCD, C_m_RCD])
 # %%
 
 # %% plot
@@ -210,6 +213,7 @@ color_bar_title = [r'$C_\alpha$', r'$C_{\beta}$']
 color_bar_title_RCD = [r'$C_\alpha^{\text{RCD}}$', r'$C_{\beta}^{\text{RCD}}$']
 color_bar_title_FM = [r"$C_{\alpha}^{\text{FM}}$",r"$C_{\beta}^{\text{FM}}$"]
 color_bar_title_noFM = [r"$C_{\alpha}^{\text{noFM}}$",r"$C_{\beta}^{\text{noFM}}$"]
+color_bar_title_res = [r"$C_{\alpha}^{\text{Res}}$",r"$C_{\beta}^{\text{Res}}$"]
 
 pads = [7, 10]
 
@@ -250,10 +254,10 @@ with plt.style.context(['science', 'ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(1):
-        pc = axes.pcolormesh(px, py, Cherns[0], cmap="jet")
+        pc = axes.pcolormesh(px, py, Cherns_RCD[0], cmap="jet")
 
         clb = fig.colorbar(pc, ax=axes, shrink=0.9)
-        clb.ax.set_title(color_bar_title_FM[0], loc='left', fontsize=18, pad=pads[1])
+        clb.ax.set_title(color_bar_title_RCD[0], loc='left', fontsize=18, pad=pads[1])
         clb.ax.tick_params(labelsize=16)
 
         axes.set_axis_on() # make sure the axis is on
@@ -265,5 +269,5 @@ with plt.style.context(['science', 'ieee']):
         axes.set_xlabel(r'$D/J$', fontsize=18)
         axes.set_ylabel(r'$B/B_s$', fontsize=18)
     plt.show()
-    fig.savefig('figures/chern_numbers/canted_Chern_number_upper_RCD_FM.png', bbox_inches='tight', dpi=300)
+    fig.savefig('figures/chern_numbers/canted_Chern_RCD_upper.png', bbox_inches='tight', dpi=300)
 # %%

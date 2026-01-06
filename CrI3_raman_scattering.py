@@ -508,3 +508,5 @@ with plt.style.context(['science','ieee']):
 # %%
 print(gap.max())
 # %%
+print(bz_integration_honeycomb(RCD, n=200)/(2*np.pi))
+# %%

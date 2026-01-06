@@ -202,29 +202,21 @@ temperatures = [0, 2, 10, 18, 26, 34, 42, 50, 58]
 temp = temperatures[5]
 partition_array = np.array([partition_function(energy_array[0], T=T)*partition_function(energy_array[1], T=T) for T in temperatures])
 # %%
-# chi_two_magnons_lower_T = np.zeros((len_s, len_w))
-# chi_AFM_lower_T = np.zeros((len_s, len_w))
-# chi_FM_lower_T = np.zeros((len_s, len_w))
-# chi_two_magnons_upper_T = np.zeros((len_s, len_w))
-# chi_AFM_upper_T = np.zeros((len_s, len_w))
-# chi_FM_upper_T = np.zeros((len_s, len_w))
+chi_two_magnons_lower_T = np.zeros((len_s, len_w))
+chi_AFM_lower_T = np.zeros((len_s, len_w))
+chi_FM_lower_T = np.zeros((len_s, len_w))
+chi_two_magnons_upper_T = np.zeros((len_s, len_w))
+chi_AFM_upper_T = np.zeros((len_s, len_w))
+chi_FM_upper_T = np.zeros((len_s, len_w))
 
-# for j in range(len_s):
-#     for i in range(len_w):
-#         chi_two_magnons_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][1] * gaussian_function(w[i], x0= 2*energy_array[j][1], width=width))
-#         chi_two_magnons_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][0] * gaussian_function(w[i], x0= 2*energy_array[j][0], width=width))
-#         chi_AFM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][5] * gaussian_function(w[i], x0= energy_array[j][1]+energy_array[j][0], width=width))
-#         chi_AFM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][4] * gaussian_function(w[i], x0= energy_array[j][1]+energy_array[j][0], width=width))
-#         chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][3] * gaussian_function(w[i], x0= np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
-#         chi_FM_upper_T[j][i] =bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][2] * gaussian_function(w[i], x0= np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
-# CrI3
-len_T = len(temperatures)
-chi_FM_lower_T = np.zeros((len_T, len_w))
-chi_FM_upper_T = np.zeros((len_T, len_w))
-for j in range(len_T):
+for j in range(len_s):
     for i in range(len_w):
-        chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1],T=temperatures[j])*cross_section_array[3] * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
-        chi_FM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1],T=temperatures[j])*cross_section_array[2] * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
+        chi_two_magnons_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][1] * gaussian_function(w[i], x0= 2*energy_array[j][1], width=width))
+        chi_two_magnons_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][0] * gaussian_function(w[i], x0= 2*energy_array[j][0], width=width))
+        chi_AFM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][5] * gaussian_function(w[i], x0= energy_array[j][1]+energy_array[j][0], width=width))
+        chi_AFM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][4] * gaussian_function(w[i], x0= energy_array[j][1]+energy_array[j][0], width=width))
+        chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][3] * gaussian_function(w[i], x0= np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
+        chi_FM_upper_T[j][i] =bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][2] * gaussian_function(w[i], x0= np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
 
 # %% dos
 dos_two_magnons_lower = np.zeros((len_s, len_w))

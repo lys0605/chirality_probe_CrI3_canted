@@ -164,11 +164,11 @@ def plot_frequency_temperature_resolved_RCD(ax, w, chi, temperatures, ls='-', **
     else:
         ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])
 #%% CrI3 parameters from Chen's paper, Phys. Rev. X. 2018
-#J1 = 2.01 # n.n Heisenberg coupling meV
+J1 = 2.01 # n.n Heisenberg coupling meV
 J2 = 0.16 # n.n.n Heisenberg coupling meV
 J3 = -0.08 # n.n.n.n Heisenberg coupling meV
 D = 0.31 # DMI meV
-J1 = 5*D
+D = J1/20
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
 
@@ -205,8 +205,8 @@ for i in range(len_w):
 #%%
 print(np.max(energy_array[1]))
 print(partition_array)
-print(boltzmann_factor(energy_array[1][67,123],T=temperatures[-1]) * partition_array[-1])
-print(boltzmann_factor(energy_array[1][67,123],T=temperatures[4]) * partition_array[4])
+print(boltzmann_factor(energy_array[1][67,123],T=temperatures[-1]) /partition_array[-1])
+print(boltzmann_factor(energy_array[1][67,123],T=temperatures[4]) /partition_array[4])
 print(temperatures[4])
 # %%
 
@@ -343,5 +343,9 @@ gamma_boltzmann = np.array([boltzmann_factor(energy_array[1][67,123],T=temperatu
 
 # %%
 
-print(max(chi_FM_lower_T[-1]))
+print(max(energy_array[1])-min(energy_array[0]))
+# %%
+print(np.min(energy_array[0])- np.max(energy_array[1]))
+# %%
+print(np.min(berry_array[1]))
 # %%

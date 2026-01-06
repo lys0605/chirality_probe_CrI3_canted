@@ -290,8 +290,8 @@ def get_berry_curvature_exact(J=1, D=0.1, S=5/2, B0=0.5):
 
             # berry curvature
             berry_FM[i,j] = (lambda_k*nu/delta_k-rho*(1-0.5*lambda_k**2/delta_k**2))/(4*delta_k**2)
-            berry_rcd_p[i,j] = -0*2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
-            berry_rcd_m[i,j] = -0*2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
+            berry_rcd_p[i,j] = -2*(p_13[i,j]/(ep+ep)**2+p_14[i,j]/(ep+em)**2-p_12[i,j]/(em-ep)**2)+2*(xi_p_k/(ep+ep)**2+sigma_k/(ep+em)**2+zeta_k/(em-ep)**2)*(rho+rho_tilde)
+            berry_rcd_m[i,j] = -2*(p_24[i,j]/(em+em)**2+p_14[i,j]/(ep+em)**2+p_12[i,j]/(ep-em)**2)-2*(xi_m_k/(em+em)**2-sigma_k/(ep+em)**2+zeta_k/(ep-em)**2)*(rho+rho_tilde)
             nu_array[i,j] = delta_k
             rp_array[i,j] = J_p
             sinhp_array[i,j] = xi_p_k
@@ -353,12 +353,12 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(2):
-        pc = axes[i].pcolormesh(kx, ky, exact[-1][i], cmap="jet",) 
+        pc = axes[i].pcolormesh(kx, ky, exact[i], cmap="viridis",) 
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
 
         clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(color_bar_title_AFM[i], loc='left', fontsize=16, pad=pads[i])
+        clb.ax.set_title(color_bar_title[i], loc='left', fontsize=16, pad=pads[i])
         clb.ax.tick_params(labelsize=16)
 
         axes[i].set_axis_on() # make sure the axis is on
@@ -402,5 +402,5 @@ with plt.style.context(['science','ieee']):
         axes.set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
         axes.set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
     plt.show()
-    fig.savefig('figures/berry_curvatures/canted_berry_curvature_upper_res.png', dpi=300, bbox_inches='tight')
+    #fig.savefig('figures/berry_curvatures/canted_berry_curvature_upper_res.png', dpi=300, bbox_inches='tight')
 # %%

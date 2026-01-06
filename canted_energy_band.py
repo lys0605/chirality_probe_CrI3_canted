@@ -130,7 +130,7 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     '''
  
     # parameters
-    Bs = 3*J*S
+    Bs = 6*J*S
     B = s*Bs
     v = s**2
     anisotropy_z = 0.22
@@ -154,8 +154,8 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
     gamma_sin = np.sum(np.sin(k@next_n_n.T), axis=1)
     
     # complex parameters
-    phi_k = J*S*gamma
-    lam_k = 2*D*S*s*gamma_sin
+    phi_k = 2*J*S*gamma
+    lam_k = 4*D*S*s*gamma_sin
     phi_k_sq = np.abs(phi_k)**2
     delta_k = np.sqrt(lam_k**2+v**2*phi_k_sq)
     varphi_k = 1j*np.log(phi_k/np.abs(phi_k))
@@ -230,7 +230,7 @@ def canted_energy_expansion_D(k,J=1.54,D=0.1,S=5/2,s=0.6):
 J = 1  # meV
 D = 0.1 # D/J = 0.1
 S = 5/2 # spin number
-s = 0.75 # saturation field ratio (sin\theta) = B/Bs
+s = 0.75     # saturation field ratio (sin\theta) = B/Bs
 
 k0 = get_kvectors(-1*K1, Gamma)
 k1 = get_kvectors(Gamma, K1)
