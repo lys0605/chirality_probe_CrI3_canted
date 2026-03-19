@@ -276,4 +276,24 @@ letter_annotation(axes[1][1], -0.0523, 0.97,r'$\mathrm{(d)}$',size=20)
 
 plt.show()
 fig.savefig("figures/panel_plots/figure1_CrI3_set_up", dpi=300, bbox_inches='tight')
+#%% 1x2; figure 2 in short paper
+img_TRCD_vary_T = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_T.png')
+img_TRCD_vary_D = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_D.png')
+#%% 
+Nr = 1
+Nc = 2
+fig, axes = panel(figsize=(18,6), 
+                  nrows=Nr, ncols=Nc, 
+                  width_ratios=[1, 1], height_ratios=[1], 
+                  hspace=0, wspace=-0.25)
+axes[0].imshow(img_TRCD_vary_T)
+axes[1].imshow(img_TRCD_vary_D)
+for n in range(Nc):
+    axes[n].set_axis_off()
+letter_annotation(axes[0],0,1.0,r'$\mathrm{(a)}$',size=20)
+letter_annotation(axes[1],0,1.0,r'$\mathrm{(b)}$',size=20)
+fig.subplots_adjust(top=0.99,bottom=0.01,right=0.99,left=0.01)
+
+plt.show()
+fig.savefig('figures/panel_plots/figure2_thermal_RCD.png', dpi=300, bbox_inches='tight')
 # %%

@@ -139,7 +139,7 @@ K1_M = get_path(k2)[1:]
 M_K2 = get_path(k3)[1:]
 K2_Gamma_2 = get_path(k4)[1:]
 
-k_label = ["K\'",r"$\Gamma$","K","M","K\'",r"$\Gamma$"]
+k_label = [r"K$^\prime$",r"$\Gamma$",r"K$^\prime$","M",r"K$^\prime$",r"$\Gamma$"]
 
 path, k_index = get_total_path(K2_Gamma,Gamma_K1,K1_M,M_K2,K2_Gamma_2)
 
@@ -149,8 +149,8 @@ red_colors = ['#ffc883', '#ff9f4d', '#ff6f00', '#c94c00', '#7f2e00'] # red color
 #%%
 with plt.style.context('science'):
     fig, ax = plt.subplots(figsize=(6,4))
-    plot(np.arange(len(path)), magnon_bands[1], ax=ax, color=blue_colors[0], linestyle='-', linewidth=1, label=r"$\epsilon_{\bf k -}$")
-    plot(np.arange(len(path)), magnon_bands[0], ax=ax, color=red_colors[0], linestyle='-', linewidth=1, label=r"$\epsilon_{\bf k +}$")
+    plot(np.arange(len(path)), magnon_bands[1], ax=ax, color=blue_colors[0], linestyle='-', linewidth=2.5, label=r"$\epsilon_{\bf k -}$")
+    plot(np.arange(len(path)), magnon_bands[0], ax=ax, color=red_colors[0], linestyle='-', linewidth=2.5, label=r"$\epsilon_{\bf k +}$")
 
     for i in range(len(k_index)-2):  
         ax.axvline(k_index[i+1], color="black", ls = '-' ,linewidth=1.0)

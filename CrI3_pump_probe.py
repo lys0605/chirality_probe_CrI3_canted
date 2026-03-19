@@ -163,15 +163,68 @@ def plot_frequency_temperature_resolved_RCD(ax, w, chi, temperatures, ls='-', **
             ax.plot(w, chi[j], ls=ls, color=kwarg['color'][j], label=kwarg['label']+fr' $T={temperatures[j]}K$')
     else:
         ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])
+# %%
+def plot_frequency_temperature_resolved_RCD_D(ax, w, chi, D_array, ls='-', **kwarg):
+    """
+    plot the frequency resolved_RCD of corresponding process for different magnetic field
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes object to plot on.
+    w : array_like
+        Frequency values.
+    chi : array_like
+        RCD values.
+    s_values : array_like
+        Magnetic field values.
+    ls : str, optional
+        Line style. The default is '-'.
+    kwarg : dict, optional
+        Additional keyword arguments for plotting.
+    Returns
+    ----------
+    """
+    if kwarg['plot_length'] != 1:
+        for j in range(kwarg['plot_length']):
+            ax.plot(w, chi[j], ls=ls, color=kwarg['color'][j], label=kwarg['label']+fr' $D={D_array[j]}$')
+    else:
+        ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])
 #%% CrI3 parameters from Chen's paper, Phys. Rev. X. 2018
 J1 = 2.01 # n.n Heisenberg coupling meV
 J2 = 0.16 # n.n.n Heisenberg coupling meV
 J3 = -0.08 # n.n.n.n Heisenberg coupling meV
 D = 0.31 # DMI meV
-D = J1/20
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
+# %%
+def get_TRCD_vary_D_T_35(D, J1=2.01, J2=0.16, J3=-0.08, Az=0.49, S=3/2):
+    """
+    Compute the temperature-resolved RCD for varying D at T=35K.
+    """
+    w = np.linspace(0,20,300)
+    len_w = len(w)
+    width = (w[1]-w[0])
+    RCD_array = get_RCD(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
+    berry_array = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
+    energy_array = get_energy(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
+    return  RCD_array, berry_array, energy_array
+# %%    
+D_array = np.linspace(-0.31, 0.31, 101)
 
+len_D = len(D_array)
+
+chi_FM_lower_D = np.zeros((len_D, len_w))
+chi_FM_upper_D = np.zeros((len_D, len_w))
+for j in range(len_D):
+    RCD_array = get_RCD(J1=J1, J2=J2, J3=J3, D=D_array[j], Az=Az, S=S)
+    energy_array = get_energy(J1=J1, J2=J2, J3=J3, D=D_array[j], Az=Az, S=S)
+    partition_array = partition_function(energy_array[0], T=35)*partition_function(energy_array[1], T=35)
+    for i in range(len_w):
+        chi_FM_lower_D[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1], T=35)*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array
+        chi_FM_upper_D[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1], T=35)*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array
+# %%
+
+# %%
 RCD_array = get_RCD(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
 berry_array = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
 energy_array = get_energy(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
@@ -182,7 +235,7 @@ len_w = len(w)
 width = (w[1]-w[0])
 
 # %% finite temperature with initial state as one magnon occupied at lowest band
-temperatures = [0, 5, 10, 15, 20, 25, 30, 35, 40,]
+temperatures = np.linspace(0, 48, 49)
 #temperatures = np.linspace(0, 45, 120)
 temp = temperatures[5]
 partition_array = np.array([partition_function(energy_array[0], T=T)*partition_function(energy_array[1], T=T) for T in temperatures])
@@ -213,20 +266,46 @@ print(temperatures[4])
 colors_vacuum = ['#00215d', '#0071bc' , '#8fd0ff']
 colors_one_magnon = ['#b6000f' , '#ff814b', '#ffc883']
 colors_temperature = ['#1a1a1a',  '#192225' , '#143349' , '#245074', '#2f6fa4', '#3989d6', '#76a1ff', '#aaceff', '#e1f0ff']
+colors_D = ['#800000', '#b34747', '#cc8080', '#e6b3b3', '#ffcccc', '#cce6ff', '#99ccff', '#66b3ff', '#3385ff', '#0066ff', '#0047b3']
 
-with plt.style.context(['science','ieee']):
-    fig, ax = plt.subplots(figsize=(3.5,3))
+with plt.style.context(['science', 'ieee']):
+    fig, ax = plt.subplots(figsize=(4, 3))
 
-    plot_frequency_temperature_resolved_RCD(ax, w, chi_FM_lower_T, temperatures, plot_length=len_T, color=colors_temperature, label=r'')
-    #plot_frequency_resolved_RCD(ax, w, dos_weighted_FM, 1, plot_length=1, ls='--', color=colors_one_magnon[1], label=r'weighted DOS')
-    #plt.axvline(w[np.argmin(chi_FM_upper[1])])
-    #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
-    #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
+    # 1. SETUP COLORMAP FOR PARAMETER D
+    # This maps the min/max of your temperatures to colors
+    norm = mpl.colors.Normalize(vmin=temperatures.min(), vmax=temperatures.max())
+    cmap = plt.get_cmap('Blues') # or 'viridis'
+
+    # 2. PLOT LOOP (Converting 2D mesh to 1D lines)
+    # We zip D_array with the rows of your Chi matrix
+    # Assuming chi_FM_lower_D shape is (len(D_array), len(w))
+    for i, T in enumerate(temperatures):
+        
+        # Extract the single line (cut) for this specific D
+        y_values = chi_FM_lower_T[i] 
+        
+        # Plot with the specific color for this D
+        ax.plot(w, y_values, 
+                color=cmap(norm(T)), 
+                linewidth=1, 
+                alpha=0.9,
+                ls='-') # Alpha helps if lines overlap
+
+    # 3. CREATE THE COLORBAR FOR D
+    sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([]) 
+    clb = fig.colorbar(sm, ax=ax, shrink=0.9)
+    
+    # Label the colorbar as D, not Chi
+    clb.ax.set_title(r"$T$", loc='left', fontsize=12)
+    clb.set_label(r'$(K)$')
+
+    # 4. AXIS LABELS
+    # Now Y-axis is Chi (Function Value)
     ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=11)
     ax.set_ylabel(rf'$\chi(\omega, T)$', fontsize=11)
-    ax.legend( fontsize=9)
     plt.show()
-    fig.savefig('frequency_resolved_thermal_RCD_CrI3.png', dpi=300, bbox_inches='tight')
+    fig.savefig('figures/thermal_RCD/CrI3_TRCD_vary_T_more.png', dpi=300 ,bbox_inches='tight')
 
 # %%
 with plt.style.context(['science','ieee']):
@@ -247,26 +326,11 @@ with plt.style.context(['science','ieee']):
 
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
-    x,y = np.meshgrid(w, temperatures)
+    x,y = np.meshgrid(w, D_array)
     # Define the colormap (e.g., 'RdBu')
     cmap = plt.get_cmap('RdBu')
 
-    # # Choose where zero should be in the colormap (e.g., black)
-    # zero_color = 'white'  # or 'red', '#FF0000', etc.
-
-    # # Create a custom colormap by inserting the zero color
-    # colors = [cmap(i) for i in np.linspace(0, 1, 256)]
-    # # Find the midpoint (where the original colormap has white)
-    # midpoint = 128  # For symmetric RdBu, this is where white is
-    # colors[midpoint] = mpl.colors.to_rgba(zero_color)  # Replace white with your color
-    # custom_cmap = mpl.colors.LinearSegmentedColormap.from_list('custom_div', colors)
-    # # Apply normalization to center at zero
-    # vmin, vmax = np.min(chi_FM_lower_T), np.max(chi_FM_lower_T)  # Adjust to your data range
-    # norm = mpl.colors.TwoSlopeNorm(vmin=vmin, vcenter=0, vmax=vmax)    
-
-    pc = axes.pcolormesh(x, y, chi_FM_lower_T, cmap=custom_cmap)
-            
-    #plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes, linestyle='-', linewidth=1, color='k')
+    pc = axes.pcolormesh(x, y, chi_FM_lower_D)
 
     clb = fig.colorbar(pc, ax=axes, shrink=0.9)
     clb.ax.set_title(r"$\chi$", loc='left', fontsize=16, pad=5)
@@ -275,77 +339,54 @@ with plt.style.context(['science','ieee']):
     axes.set_axis_on() # make sure the axis is on
     axes.grid(False) # make sure the grid is off
 
-    # axes.set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-    # axes.set_xticklabels(['-1', '0', '1'], fontsize=16)
-    # axes.set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-    # axes.set_yticklabels(['-1', '0', '1'], fontsize=16)
-
     axes.set_xlabel(r'$\hslash\omega (meV)$', fontsize=18)
-    axes.set_ylabel(r'$T (K)$', fontsize=18)
+    axes.set_ylabel(r'$D (meV)$', fontsize=18)
     #axes.set_title('RCD of '+r"$CrI_3$", fontsize=18)
     plt.show()    
-# def normalize(x):
-#     return x/np.max(np.abs(x))
 
-# with plt.style.context(['science','ieee']):
-#     fig = plt.figure(figsize=(4,6))
-#     gs = fig.add_gridspec(2, hspace=0)
-#     axes = gs.subplots(sharex=True)
-
-#     for ax in axes:
-#         ax.set_box_aspect(0.75)
-    
-#     plot_frequency_resolved_RCD(axes[0], w, normalize(chi_vacuum[1]), s_values[1], plot_length=1, color=colors_vacuum[-1], label=r'$\chi^{(0)}(\omega)$')
-#     plot_frequency_resolved_RCD(axes[0], w, normalize(chi_one_magnon[1]), s_values[1], plot_length=1, color=colors_one_magnon[-1], label=r'$\chi^{(1)}(\omega)$')
-#     plot_frequency_resolved_RCD(axes[0], w, normalize(dos_weighted_one_magnon[1]), s_values[1], ls='--', plot_length=1, color='grey', label=r'$\Lambda$')
-
-#     plot_frequency_resolved_RCD(axes[1], w, normalize(chi_vacuum[3]), s_values[3], plot_length=1, color=colors_vacuum[-1], label=r'$\chi^{(0)}(\omega)$')
-#     plot_frequency_resolved_RCD(axes[1], w, normalize(chi_one_magnon[3]), s_values[3], plot_length=1, color=colors_one_magnon[-1], label=r'$\chi^{(1)}(\omega)$')
-#     plot_frequency_resolved_RCD(axes[1], w, normalize(dos_weighted_one_magnon[3]), s_values[3], ls='--', plot_length=1, color='black', label=r'$\Lambda^\prime$')
-#     #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
-#     #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
-#     axes[1].set_xlabel(r'$\hslash\omega/J$', fontsize=15)
-#     axes[0].set_ylabel(r'', fontsize=15)
-#     axes[1].set_ylabel(r'', fontsize=15)
-#     axes[0].legend(loc="lower left", fontsize=13)
-#     axes[1].legend(loc="lower left", fontsize=13)
-#     plt.show()
-    #fig.savefig('figures/pump_probe/frequency_resolved_RCD_vacuum_2dos.png', dpi=300, bbox_inches='tight')
 # %%
 gamma_boltzmann = np.array([boltzmann_factor(energy_array[1][67,123],T=temperatures[j]) for j in range(len(temperatures))])
 
-#%% distance and gap
-# gap = np.array([np.min(energy_array[i][0]-energy_array[i][1]) for i in range(4)])
-# gap[1] = energy_array[1][0][67,123]-energy_array[1][1][67,123]
-# gap[2] = energy_array[2][0][67,123]-energy_array[2][1][67,123]
-# gap[3] = energy_array[3][0][67,123]-energy_array[3][1][67,123]
-# gap = np.append(gap, (energy_array[4][0][67,123]-energy_array[4][1][67,123]))
-
-# fm_peak = np.array([w[np.argmax(chi_FM_upper[i])] for i in range(5)])
-# fm_peak[1] = w[np.argmin(chi_FM_upper[1])]
-
-# distance = np.array([(w[np.argmax(chi_two_magnons_upper[i])]-w[np.argmin(chi_two_magnons_lower[i])])/2 for i in range(5)])
-
-# with plt.style.context(['science','ieee']):
-#     fig, ax = plt.subplots(figsize=(4,3))
-
-#     #ax.plot([0,0.25,0.5,0.75],distance, '-o', color='#b5b5b8', label='distance')
-#     ax.plot([0,0.25,0.5,0.75, 1], gap , '-o', color='#b5b5b8', label=r'$\Delta_g$')
-#     ax.plot([0,0.25,0.5,0.75, 1], distance , '-o', color='#0071bc', label=r'$\Delta_{\text{RCD}}$')
-#     ax.plot([0,0.25,0.5,0.75, 1], fm_peak , '-o', color='#ff5050', label=r'$\xi_{\text{FM}}$')
-   
-#     ax.set_ylabel(r'$\hslash\omega/J$', fontsize=12)
-#     ax.set_xlabel(r'$B/B_s$', fontsize=12)
-#     ax.set_xticks([0,0.25,0.5,0.75, 1])
-#     ax.legend(fontsize=12)
-#     plt.show()
-    #fig.savefig('figures/pump_probe/gap_distance_fm_peak.png', dpi=300, bbox_inches='tight')
-
 # %%
+with plt.style.context(['science', 'ieee']):
+    fig, ax = plt.subplots(figsize=(4, 3))
 
-print(max(energy_array[1])-min(energy_array[0]))
+    # 1. SETUP COLORMAP FOR PARAMETER D
+    # This maps the min/max of your D_array to colors
+    norm = mpl.colors.Normalize(vmin=D_array.min(), vmax=D_array.max())
+    cmap = plt.get_cmap('RdBu') # or 'viridis'
+
+    # 2. PLOT LOOP (Converting 2D mesh to 1D lines)
+    # We zip D_array with the rows of your Chi matrix
+    # Assuming chi_FM_lower_D shape is (len(D_array), len(w))
+    for i, d_val in enumerate(D_array):
+        
+        # Extract the single line (cut) for this specific D
+        y_values = chi_FM_lower_D[i] 
+        
+        # Plot with the specific color for this D
+        ax.plot(w, y_values, 
+                color=cmap(norm(d_val)), 
+                linewidth=1, 
+                alpha=0.9,
+                ls='-') # Alpha helps if lines overlap
+
+    # 3. CREATE THE COLORBAR FOR D
+    sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
+    sm.set_array([]) 
+    clb = fig.colorbar(sm, ax=ax, shrink=0.9)
+    
+    # Label the colorbar as D, not Chi
+    clb.ax.set_title(r"$D$", loc='left', fontsize=12)
+    clb.set_label(r'$(meV)$')
+
+    # 4. AXIS LABELS
+    # Now Y-axis is Chi (Function Value)
+    ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=11) # The function value is now the geometry
+    ax.set_ylabel(r'$\chi(\omega,D)$', fontsize=11)
+    plt.show()
+    fig.savefig('figures/thermal_RCD/CrI3_TRCD_vary_D_more.png', dpi=300 ,bbox_inches='tight')
 # %%
-print(np.min(energy_array[0])- np.max(energy_array[1]))
-# %%
-print(np.min(berry_array[1]))
+np.linspace(0, 48, 49)
+
 # %%

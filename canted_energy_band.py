@@ -108,7 +108,7 @@ def canted_energy(k,J=1.54,D=0.1,S=5/2,s=0.6):
     
     # complex parameters
     phi_k = 2*J*S*gamma
-    lam_k = 4*D*S*s*gamma_sin
+    lam_k = 4*D*S*s*gamma_sin   
     phi_k_sq = np.abs(phi_k)**2
     delta_k = np.sqrt(lam_k**2+v**2*phi_k_sq)
     varphi_k = 1j*np.log(phi_k/np.abs(phi_k))

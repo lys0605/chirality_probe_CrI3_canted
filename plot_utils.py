@@ -88,3 +88,46 @@ def panel_unequal(figsize=(8,6), nrows=2, ncols=2, width_ratios=[1, 1], height_r
     #     ax.set_box_aspect(1)
     #     ax.set_axis_off()
     return fig, gs
+
+def plot_lines_with_colorbar(fig, ax, x, y, values_for_color, color_bar_title='', color_bar_label='' ,cmap='viridis', linestyle='-', linewidth=2, alpha=0.9):
+    """
+    Plot multiple lines on the same axes with colors determined by a colormap and add a colorbar.
+
+    Parameters:
+        fig (matplotlib.figure.Figure): The figure object.
+        ax (matplotlib.axes.Axes): The axes object to plot on.
+        x (array-like): Data for the x-axis.
+        y (2D array-like): Each row corresponds to a different line to plot.
+        values_for_color (array-like): Values used to determine the color of each line.
+        cmap (str): Colormap name.
+        linestyle (str): Style of the line (e.g., '-', '--', ':').
+        linewidth (int): Width of the line.
+
+    Returns:
+        sm (matplotlib.cm.ScalarMappable): The ScalarMappable for the colorbar.
+    """
+    import matplotlib as mpl
+
+    # 1. Normalize the values for color mapping
+    norm = mpl.colors.Normalize(vmin=np.min(values_for_color), vmax=np.max(values_for_color))
+    cmap = plt.get_cmap(cmap)
+
+    # 2. Plot each line with the corresponding color
+    for i, val in enumerate(values_for_color):
+
+        # Plot with specific color for this value
+        color = scalar_map.to_rgba(val)
+        ax.plot(x, y[i], 
+                color=cmap(norm(val)),
+                alpha=alpha,
+                linestyle=linestyle,
+                linewidth=linewidth)
+
+    # 3. Create corresponding colorbar
+    scalar_map = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
+    scalar_map.set_array([])
+    cbar = fig.colorbar(scalar_map, ax=ax)
+    cbar.set_label(color_bar_label)
+    cbar.ax.set_title(color_bar_title)
+
+    return fig, ax 
