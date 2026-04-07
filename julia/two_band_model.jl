@@ -1,13 +1,12 @@
 using LinearAlgebra, CairoMakie
 
+const σ₀ = [1 0; 0 1]
+const σₓ = [0 1; 1 0]
+const σᵧ = ComplexF64[0 -im; im 0]
+const σ𝓏 = [1 0; 0 -1]
+
 function two_band_model(kx, ky)
     # Construct the two-band model Hamiltonian by defined d₀, d₁, d₂, d₃
-    
-    σ₀ = [1 0; 0 1]
-    σₓ = [0 1; 1 0]
-    σᵧ = [0 -im; im 0]
-    σ𝓏 = [1 0; 0 -1]
-
     H = d₀(kx, ky) * σ₀ + d₁(kx, ky) * σₓ + d₂(kx, ky) * σᵧ + d₃(kx, ky) * σ𝓏
     return H
 end

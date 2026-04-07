@@ -1,125 +1,158 @@
+# Chirality Probe
 
-![Awesome ReadME](https://github.com/pottekkat/awesome-readme/raw/master/header.png)
+Computational condensed-matter physics project for calculating and visualising
+**optical chirality** in magnetically ordered materials via Raman Circular
+Dichroism (RCD) and related spectroscopic quantities.
 
-# Project Title
+---
 
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/navendu-pottekkat/awesome-readme?include_prereleases)](https://img.shields.io/github/v/release/navendu-pottekkat/awesome-readme?include_prereleases)
-[![GitHub last commit](https://img.shields.io/github/last-commit/navendu-pottekkat/awesome-readme)](https://img.shields.io/github/last-commit/navendu-pottekkat/awesome-readme)
-[![GitHub issues](https://img.shields.io/github/issues-raw/navendu-pottekkat/awesome-readme)](https://img.shields.io/github/issues-raw/navendu-pottekkat/awesome-readme)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/navendu-pottekkat/awesome-readme)](https://img.shields.io/github/issues-pr/navendu-pottekkat/awesome-readme)
-[![GitHub](https://img.shields.io/github/license/navendu-pottekkat/awesome-readme)](https://img.shields.io/github/license/navendu-pottekkat/awesome-readme)
+## Physical systems
 
-The project title is a level 1 heading (`<h1>Project Title</h1>` or `# Project Title`).
+| System | Description | Key scripts |
+|--------|-------------|-------------|
+| **CrI₃** | Ferromagnetic honeycomb van der Waals insulator | `CrI3_band.py`, `CrI3_curvature.py`, `CrI3_raman_scattering.py`, `CrI3_pump_probe.py` |
+| **Canted AFM** | Canted antiferromagnet on honeycomb lattice | `canted_energy_band.py`, `canted_chern_number.py`, `canted_RCD.py`, `canted_curvature.py`, `canted_raman_cross_section.py` |
+| **Pump–probe** | Time-resolved / finite-temperature RCD spectroscopy | `pump_probe.py`, `finite_temperature_pump_probe.py` |
 
-If your project has a name, then this is where it would go.
+---
 
-If your project does not have a name, you can use this space to explain the project. For example, code repositories of research papers usually have the paper title here.
+## Module architecture
 
-You can also add your branding in a cover image. It makes the README unique and gets people's attention quickly.
+The codebase is split into **shared library modules** (lower layers) and
+**thin calculation scripts** (upper layer).  Each script imports from the
+library modules and is responsible only for setting parameters, running the
+calculation, and producing figures.
 
-Wait, I forgot something. You can use this README as a template from [this link](README-template.md).
-
-I usually prefer the dimensions 1280×650. It has worked well for me so far. I can also reuse it as my social preview image for the repo.
-
-Below the title, you will see some badges. These can be used to show the status of the project.
-
-The badges used here were generated with [shields.io](https://shields.io/).
-
-You can add a workflow status badge to indicate the status of your workflows in your README. This can used to answer questions like, `is the build working?` or `are the e2e tests passing?`.
-
-The badges used here are explained below:
-
-<!-- Add badges with link to Shields IO -->
-
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/navendu-pottekkat/awesome-readme?include_prereleases)
-: Shows the current release version.
-
-![GitHub last commit](https://img.shields.io/github/last-commit/navendu-pottekkat/awesome-readme)
-: Shows the last commit time. Good indication of the project activity.
-
-![GitHub issues](https://img.shields.io/github/issues-raw/navendu-pottekkat/awesome-readme)
-: Dynamic badge that shows the number of open issues in the project.
-
-![GitHub pull requests](https://img.shields.io/github/issues-pr/navendu-pottekkat/awesome-readme)
-: Similar dynamic badge, but for pull requests.
-
-![GitHub](https://img.shields.io/github/license/navendu-pottekkat/awesome-readme)
-: Shows the open source license the project uses.
-
-# Quick Start Demo
-
-![Demo Preview](https://picsum.photos/1920/1080)
-
-I believe that you should bring value to the reader as soon as possible. You should be able to get the user up and running with your project with minimal friction.
-
-If you have a quickstart guide, this is where it should be.
-
-Alternatively, you can add a demo to show what your project can do.
-
-# Table of Contents
-
-This is a table of contents for your project. It helps the reader navigate through the README quickly.
-- [Project Title](#project-title)
-- [Quick Start Demo](#quick-start-demo)
-- [Table of Contents](#table-of-contents)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Development](#development)
-- [Contribute](#contribute)
-- [License](#license)
-
-
-# Installation
-[(Back to top)](#table-of-contents)
-
-> **Note**: For longer README files, I usually add a "Back to top" buttton as shown above. It makes it easy to navigate.
-
-This is where your installation instructions go.
-
-You can add snippets here that your readers can copy-paste with click:
-
-```shell
-gh repo clone navendu-pottekkat/awesome-readme
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                      CALCULATION SCRIPTS                             ║
+║                                                                      ║
+║  CrI3_band.py            canted_energy_band.py    pump_probe.py      ║
+║  CrI3_curvature.py       canted_chern_number.py   finite_temp_pp.py  ║
+║  CrI3_raman_scattering.py  canted_RCD.py          panel_plot.py      ║
+║  CrI3_pump_probe.py      canted_curvature.py                         ║
+║                          canted_raman_cross_section.py               ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                        LIBRARY MODULES                               ║
+║                                                                      ║
+║  parameters.py      ─── material constants & physical constants      ║
+║  │                       CrI3 {J1, J2, J3, D, Az, S}                 ║
+║  │                       CANTED_AFM {J, D, S}                        ║
+║  │                       k_B_meV, k_B_eV                             ║
+║  │                                                                   ║
+║  honeycomb_lattice.py ── lattice geometry & Brillouin zone           ║
+║  │                       High-symmetry pts: GAMMA, K, K_PRIME,       ║
+║  │                                          M_POINT                  ║
+║  │                       k-mesh:       bzmesh()                      ║
+║  │                       k-path:       get_kvectors(), get_path(),   ║
+║  │                                     group_kvectors(),             ║
+║  │                                     get_total_path()              ║
+║  │                       BZ integrals: bz_integration_honeycomb()    ║
+║  │                       BZ boundary:  honeycomb_bz()                ║
+║  │                       Rotation:     rotation2D()                  ║
+║  │                                                                   ║
+║  math_utils.py      ─── pure mathematical utilities                  ║
+║  │                       Im, Re            (complex helpers)         ║
+║  │                       normalize()                                 ║
+║  │                       gaussian_function()                         ║
+║  │                       lorentzian_function()                       ║
+║  │                       is_invertible(), print_matrix()             ║
+║  │                                                                   ║
+║  thermal.py         ─── temperature-dependent statistics             ║
+║  │                       bose_einstein(E, T)       [meV / K]         ║
+║  │                       boltzmann_factor(E, T)                      ║
+║  │                       occupation_function(E, T)                   ║
+║  │                                                                   ║
+║  plot_utils.py      ─── visualisation helpers                        ║
+║                          plot(), panel(), panel_unequal()            ║
+║                          letter_annotation()                         ║
+║                          plot_lines_with_colorbar()                  ║
+║                          plot_frequency_resolved_RCD()               ║
+║                          plot_frequency_temperature_resolved_RCD()   ║
+╚══════════════════════════════════════════════════════════════════════╝
 ```
 
+### Dependency graph (arrows = "imports from")
 
-# Usage
-[(Back to top)](#table-of-contents)
-
-Next, you have to explain how to use your project. You can create subsections under here to explain more clearly.
-
-
-# Development
-[(Back to top)](#table-of-contents)
-
-You have people who want to use your project and then you have people who want contribute to your project.
-
-This is where you provide instructions for the latter.
-
-Add instructions on how to set up a development environment, clone, and build the project.
-
-You can use the code snippets here as well:
-
-```shell
-command to clone your project
-command to build your project
-command to run your project in development mode
+```
+parameters.py
+      ↑
+   thermal.py
+      ↑
+honeycomb_lattice.py    math_utils.py    plot_utils.py
+         ↑                   ↑                ↑
+         └───────────────────┴────────────────┘
+                             ↑
+                   [calculation scripts]
 ```
 
+> `mathfuntion.py` is kept as a backward-compatibility shim that
+> re-exports everything from `math_utils.py`.
 
-# Contribute
-[(Back to top)](#table-of-contents)
+---
 
-You can use this section to highlight how people can contribute to your project.
+## Key physics computed
 
-You can add information on how they can open issues or how they can sponsor the project.
+| Quantity | Symbol | Where |
+|----------|--------|-------|
+| Magnon band structure | ε±(k) | `CrI3_band.py`, `canted_energy_band.py` |
+| Berry curvature | Ω(k) | `CrI3_curvature.py`, `canted_curvature.py` |
+| Quantum geometric tensor | g(k) | `CrI3_curvature.py` |
+| Chern number | C | `canted_chern_number.py` |
+| Raman cross-section | σ(k) | `CrI3_raman_scattering.py`, `canted_raman_cross_section.py` |
+| RCD spectrum | χ(ω) | `canted_RCD.py`, `pump_probe.py` |
+| Finite-T RCD | χ(ω, T) | `finite_temperature_pump_probe.py` |
 
+---
 
-# License
-[(Back to top)](#table-of-contents)
+## Unit conventions
 
-You can also mention what license the project uses. I usually add it like this:
+| Quantity | Unit |
+|----------|------|
+| Energies (CrI₃) | meV |
+| Energies (canted AFM) | meV, normalised to J = 1 meV |
+| Temperature | K |
+| Boltzmann constant | 8.617 × 10⁻² meV K⁻¹ — see `thermal.py` and `parameters.py` |
+| Lattice constant | a = 1 (dimensionless) |
 
-[MIT license](./LICENSE)
+---
 
+## File index
 
+```
+── Library modules ──────────────────────────────────────────────────────
+parameters.py                 material & physical constants
+math_utils.py                 lineshapes, normalisation, complex helpers
+thermal.py                    Bose–Einstein, Boltzmann weights
+honeycomb_lattice.py          lattice geometry, BZ mesh, k-paths
+plot_utils.py                 all plotting helpers
+mathfuntion.py                backward-compat shim → re-exports math_utils
+
+── CrI₃ scripts ─────────────────────────────────────────────────────────
+CrI3_band.py                  magnon band structure along high-sym path
+CrI3_curvature.py             Berry curvature and quantum metric on BZ
+CrI3_raman_scattering.py      Raman cross-section and RCD k-maps
+CrI3_pump_probe.py            pump–probe RCD spectra
+
+── Canted AFM scripts ───────────────────────────────────────────────────
+canted_energy_band.py         magnon band structure
+canted_chern_number.py        Berry curvature and Chern number vs (B, D)
+canted_curvature.py           RCD Berry curvature on BZ
+canted_RCD.py                 RCD amplitudes (exact & LMC methods)
+canted_raman_cross_section.py Raman cross-section on BZ mesh
+
+── Pump–probe / thermal scripts ─────────────────────────────────────────
+pump_probe.py                 T = 0 frequency-resolved RCD
+finite_temperature_pump_probe.py  finite-T RCD χ(ω, T)
+
+── Figure assembly ──────────────────────────────────────────────────────
+panel_plot.py                 assemble multi-panel publication figures
+```
+
+---
+
+## Julia code
+
+Higher-performance versions of the Berry curvature and Chern number
+calculations are implemented in Julia (`.jl` files in the project root)
+for parameter sweeps where the Python k-space loops are too slow.

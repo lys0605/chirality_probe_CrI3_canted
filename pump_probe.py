@@ -2,103 +2,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from plot_utils import plot, letter_annotation, panel
-from mathfuntion import Im, Re, is_invertible
+from plot_utils import plot, letter_annotation, panel, plot_frequency_resolved_RCD
+from math_utils import gaussian_function, lorentzian_function, normalize
+from thermal import bose_einstein, boltzmann_factor
 from honeycomb_lattice import *
 from canted_raman_cross_section import *
 import scienceplots
-# %%
-def gaussian_function(x, x0=0, width=1e-3):
-    """
-    1D Gaussian function
-    Parameters
-    ----------
-    x : array_like
-        Input values.
-    x0 : float, optional
-        Center of the Gaussian. The default is 0.
-    width : float, optional
-        Width of the Gaussian. The default is 1e-3.
-    Returns
-    ----------
-    """
-    epsilon = width
-    return 1/(epsilon*np.sqrt(2*np.pi))*np.exp(-0.5*((x-x0)/width)**2)
-
-def lorentzian_function(x, x0=0, width=1e-3):
-    """
-    1D Lorentzian function
-    Parameters
-    ----------
-    x : array_like
-        Input values.
-    x0 : float, optional
-        Center of the Lorentzian. The default is 0.
-    width : float, optional
-        Width of the Lorentzian. The default is 1e-3.
-    Returns
-    ----------
-    """
-    epsilon = width
-    return (epsilon/np.pi)/((x-x0)**2+epsilon**2)
-
-def bose_einstein_distribution(E, T=0, mu=0):
-    """
-    Bose-Einstein distribution function
-    Parameters
-    ----------
-    E : array_like
-        Energy values.
-    T : float, optional
-        Temperature in Kelvin. The default is 0.
-    mu : float, optional
-        Chemical potential in eV. The default is 0.
-    Returns
-    ----------
-    """
-    k_B = 8.617333262145e-5 # eV/K
-    return 1/(np.exp((E-mu)/(k_B*T))-1)
-
-def partition_function(energy_array, T=0,mu=0):
-    """
-    Partition function for Bose-Einstein distribution
-    Parameters
-    ----------
-    energy_array : array_like (energy values computed in BZ; the accuracy depends on the resolution of the defined BZ (k-points))
-    T : float, optional
-        Temperature in Kelvin. The default is 0.
-    mu : float, optional
-        Chemical potential in eV. The default is 0.
-    Returns
-    ----------
-    """
-    return np.sum(bose_einstein_distribution(energy_array, T=T, mu=mu))
-
-def plot_frequency_resolved_RCD(ax, w, chi, s_values, ls='-', **kwarg):
-    """
-    plot the frequency resolved_RCD of corresponding process for different magnetic field
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        Axes object to plot on.
-    w : array_like
-        Frequency values.
-    chi : array_like
-        RCD values.
-    s_values : array_like
-        Magnetic field values.
-    ls : str, optional
-        Line style. The default is '-'.
-    kwarg : dict, optional
-        Additional keyword arguments for plotting.
-    Returns
-    ----------
-    """
-    if kwarg['plot_length'] != 1:
-        for j in range(kwarg['plot_length']):
-            ax.plot(w, chi[j], ls=ls, color=kwarg['color'][j], label=kwarg['label']+fr' $B={s_values[j]}B_s$')
-    else:
-        ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])
 # %%
 
 J = 1
@@ -220,8 +129,6 @@ with plt.style.context(['science','ieee']):
     #fig.savefig('figures/pump_probe/frequency_resolved_RCD_vacuum_one_magnon.png', dpi=300, bbox_inches='tight')
 
 # %%
-def normalize(x):
-    return x/np.max(np.abs(x))
 with plt.style.context(['science','ieee']):
     fig = plt.figure(figsize=(4,6))
     gs = fig.add_gridspec(2, hspace=0)

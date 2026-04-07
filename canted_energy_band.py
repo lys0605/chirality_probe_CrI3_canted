@@ -2,19 +2,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from plot_utils import plot, letter_annotation, panel
-from mathfuntion import Im, Re, is_invertible
+from math_utils import Im, Re, is_invertible
+from honeycomb_lattice import (get_kvectors, get_path, get_total_path,
+                                group_kvectors, GAMMA, K, K_PRIME, M_POINT)
 import scienceplots
 
 mpl.rcParams['xtick.labelsize'] = 20
 mpl.rcParams['ytick.labelsize'] = 20
 mpl.rcParams['axes.labelsize'] = 22
 
-dot = np.vectorize(np.dot,signature='(n),(m)->()')
-
-Gamma = np.array([0, 0]) # Gamma
-K1 = 2*np.pi*np.array([2/3,0])/np.sqrt(3) # K
-M = 2*np.pi*np.array([1/2,1/(2*np.sqrt(3))])/np.sqrt(3) # M
-K2 = 2*np.pi*np.array([1/3,1/np.sqrt(3)])/np.sqrt(3) # K'
+# Aliases matching names used in this script
+Gamma = GAMMA
+K1    = K
+K2    = K_PRIME
+M     = M_POINT
 
 #%%
 def draw_circle(ax, center, radius=0.2, xscale=1, yscale=1, handedness='R', turns=2, phase=0, tilde_x=0, tilde_y=0, color='black'):

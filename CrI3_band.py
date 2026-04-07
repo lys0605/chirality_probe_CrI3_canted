@@ -3,59 +3,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from plot_utils import plot, letter_annotation, panel
-from mathfuntion import Im, Re, is_invertible
+from math_utils import Im, Re, is_invertible
+from honeycomb_lattice import (get_kvectors, get_path, get_total_path,
+                                group_kvectors, GAMMA, K, K_PRIME, M_POINT)
 import scienceplots
 
 mpl.rcParams['xtick.labelsize'] = 24
 mpl.rcParams['ytick.labelsize'] = 24
 mpl.rcParams['axes.labelsize'] = 24
 
-dot = np.vectorize(np.dot,signature='(n),(m)->()')
+# Aliases matching names used in this script
+K1 = K
+K2 = K_PRIME
+M  = M_POINT
 
-Gamma = np.array([0, 0]) # Gamma
-K1 = 2*np.pi*np.array([2/3,0])/np.sqrt(3) # K
-M = 2*np.pi*np.array([1/2,1/(2*np.sqrt(3))])/np.sqrt(3) # M
-K2 = 2*np.pi*np.array([1/3,1/np.sqrt(3)])/np.sqrt(3) # K'
-
-def get_kvectors(pt1,pt2,num=101):
-    """
-    2D version
-    """
-    # get k_vectors
-    kx = np.linspace(pt1[0],pt2[0],num=num)
-    ky = np.linspace(pt1[1],pt2[1],num=num)
-    k = np.vstack((kx,ky)).T
-    return k
-
-def get_path(k):
-    dot = np.vectorize(np.dot,signature='(n),(m)->()')
-    return np.sqrt(dot(k,k))
-
-def get_total_path(*arg):
-    '''
-    connect all the paths
-    '''
-    length = len(arg)
-    lengths = np.zeros(length)
-    k_index = np.zeros(length+1)
-    path = np.concatenate(arg)
-    for j in range(length):
-        lengths[j] = len(arg[j])
-    k_index[-1] = lengths.sum()
-    for i in range(length-1):
-        if i != 0:
-            k_index[i+1] = k_index[i]+lengths[i]   
-        else:
-            k_index[i+1] = k_index[i]+lengths[i]-1
-    return path, k_index
-
-def group_kvectors(*arg):
-    k_vectors = arg[0]
-    for i in range(len(arg)-1):
-        k_vectors = np.concatenate((k_vectors,arg[i+1][1:]))
-    return k_vectors
-
-def get_band(energy_function,k_vectors,**kwarg):
+def get_band(energy_function, k_vectors, **kwarg):
     """
     get band
     """
@@ -123,11 +85,11 @@ D = 0.31 # DMI meV
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
 
-k0 = get_kvectors(-1*K1, Gamma)
-k1 = get_kvectors(Gamma, K1)
+k0 = get_kvectors(-1*K1, GAMMA)
+k1 = get_kvectors(GAMMA, K1)
 k2 = get_kvectors(K1, M, num=51)
 k3 = get_kvectors(M, K2, num=51)
-k4 = get_kvectors(K2, Gamma)
+k4 = get_kvectors(K2, GAMMA)
 k_vectors = group_kvectors(k0, k1, k2, k3, k4)
 
 #%%
@@ -155,13 +117,15 @@ with plt.style.context('science'):
     for i in range(len(k_index)-2):  
         ax.axvline(k_index[i+1], color="black", ls = '-' ,linewidth=1.0)
 
-    ax.set_xticks(k_index,k_label)
+    ax.set_xticks(k_index,k_label, fontsize=24)
     ax.yaxis.grid()
+    yticks = ax.get_yticks()
+    ax.set_yticklabels(['' if t == 0 else str(int(t)) for t in yticks], fontsize=24)
     ax.set_xlim(0,len(path)) 
     ax.set_ylim(0,22) 
     ax.set_in_layout(True)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.62,0.01), fontsize=18, frameon=True)
-    ax.set_ylabel(r"$\epsilon$ (meV)")
+    ax.legend(loc="lower center", bbox_to_anchor=(0.62,0.01), fontsize=24, frameon=True)
+    ax.set_ylabel(r"$\epsilon$ (meV)", fontsize=28)
     # $\mathrm{(meV)}$
     fig.tight_layout()
     plt.show()

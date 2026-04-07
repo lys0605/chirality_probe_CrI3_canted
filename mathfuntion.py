@@ -1,27 +1,8 @@
-import numpy as np
-from IPython.display import display, Math
-
-def Imaginary(z):
-    return z.imag
-Im = np.vectorize(Imaginary)
-
-def Real(z):
-    return z.real
-Re = np.vectorize(Real)
-
-def is_invertible(matrix):
-    return matrix.shape[0] == matrix.shape[1] and np.linalg.matrix_rank(matrix) == matrix.shape[0]
-
-def print_matrix(array):
-    matrix = ''
-    for row in array:
-        try:
-            for number in row:
-                matrix += f'{number}&'
-        except TypeError:
-            matrix += f'{row}&'
-        matrix = matrix[:-1] + r'\\'
-    display(Math(r'\begin{bmatrix}'+matrix+r'\end{bmatrix}'))
-
-def normalize(x):
-    return x/np.max(np.abs(x))
+"""
+mathfuntion.py  (backward-compatibility shim)
+=============================================
+All functions have been moved to math_utils.py.
+This file re-exports everything so that existing
+``from mathfuntion import ...`` statements continue to work.
+"""
+from math_utils import *   # noqa: F401, F403

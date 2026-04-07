@@ -1,7 +1,98 @@
 import numpy as np
+import numpy.linalg as LA
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 Path = mpath.Path
+
+# ---------------------------------------------------------------------------
+# High-symmetry k-points for the honeycomb Brillouin zone (lattice constant a=1)
+# ---------------------------------------------------------------------------
+GAMMA  = np.array([0, 0])
+K      = 2 * np.pi * np.array([2/3, 0]) / np.sqrt(3)           # K  point
+K_PRIME = 2 * np.pi * np.array([1/3, 1/np.sqrt(3)]) / np.sqrt(3)  # K' point
+M_POINT = 2 * np.pi * np.array([1/2, 1/(2*np.sqrt(3))]) / np.sqrt(3)  # M point
+
+
+# ---------------------------------------------------------------------------
+# k-path utilities for band-structure plots
+# ---------------------------------------------------------------------------
+
+def get_kvectors(pt1, pt2, num=101):
+    """
+    Return an array of *num* k-vectors linearly interpolated from *pt1* to *pt2*.
+
+    Parameters
+    ----------
+    pt1, pt2 : array_like  start and end points in reciprocal space
+    num      : int         number of points (default 101)
+
+    Returns
+    -------
+    k : ndarray, shape (num, 2)
+    """
+    kx = np.linspace(pt1[0], pt2[0], num=num)
+    ky = np.linspace(pt1[1], pt2[1], num=num)
+    return np.vstack((kx, ky)).T
+
+
+def get_path(k):
+    """
+    Return cumulative arc-length along the k-path *k*.
+
+    Parameters
+    ----------
+    k : ndarray, shape (N, 2)
+
+    Returns
+    -------
+    path : ndarray, shape (N,)  cumulative distance from the first point
+    """
+    dot = np.vectorize(np.dot, signature='(n),(m)->()')
+    return np.sqrt(dot(k, k))
+
+
+def group_kvectors(*segments):
+    """
+    Concatenate k-path *segments*, removing duplicate endpoints.
+
+    Parameters
+    ----------
+    *segments : ndarrays  each of shape (N_i, 2)
+
+    Returns
+    -------
+    k_vectors : ndarray, shape (total_points, 2)
+    """
+    k_vectors = segments[0]
+    for seg in segments[1:]:
+        k_vectors = np.concatenate((k_vectors, seg[1:]))
+    return k_vectors
+
+
+def get_total_path(*segments):
+    """
+    Compute the cumulative arc-length along a multi-segment k-path and
+    return the indices of the high-symmetry junctions.
+
+    Parameters
+    ----------
+    *segments : ndarrays  arc-length arrays for each segment (from get_path)
+
+    Returns
+    -------
+    path    : ndarray  concatenated arc-length array
+    k_index : ndarray  indices of high-symmetry points (including endpoints)
+    """
+    lengths = np.array([len(s) for s in segments], dtype=float)
+    k_index = np.zeros(len(segments) + 1)
+    path = np.concatenate(segments)
+    k_index[-1] = lengths.sum()
+    for i in range(len(segments) - 1):
+        if i != 0:
+            k_index[i + 1] = k_index[i] + lengths[i]
+        else:
+            k_index[i + 1] = k_index[i] + lengths[i] - 1
+    return path, k_index
 
 def get_reciprocal_vectors(a:np.ndarray, d=2):
     """

@@ -245,7 +245,7 @@ fig.subplots_adjust(wspace=0.05, hspace=-0.01) # fix the spacing
 # first row
 axes[0,0].imshow(img_set_up_CrI3)
 pos_00_1 = axes[0,0].get_position() # get the original position 
-pos_00_2 = [pos_00_1.x0+0.0055, pos_00_1.y0 , pos_00_1.width, pos_00_1.height]
+pos_00_2 = [pos_00_1.x0-0.0055, pos_00_1.y0 , pos_00_1.width, pos_00_1.height]
 axes[0][0].set_position(pos_00_2) # set a new position
 
 axes[0,1].imshow(img_CrI3_bands)
@@ -256,44 +256,43 @@ axes[0,1].set_position(pos_01_2) # set a new position
 # second row
 axes[1,0].imshow(img_CrI3_berry_curvature_upper)
 pos_10_1 = axes[1,0].get_position() # get the original position
-pos_10_2 = [pos_10_1.x0+0.0055 , pos_10_1.y0 , pos_10_1.width, pos_10_1.height]
+pos_10_2 = [pos_10_1.x0-0.01, pos_10_1.y0 , pos_10_1.width, pos_10_1.height]
 axes[1,0].set_position(pos_10_2) # set a new position
 
 axes[1,1].imshow(img_CrI3_berry_curvature_lower)
 pos_11_1 = axes[1,1].get_position() # get the original position
-pos_11_2 = [pos_11_1.x0+0.0055 , pos_11_1.y0 , pos_11_1.width, pos_11_1.height]
+pos_11_2 = [pos_11_1.x0 , pos_11_1.y0 , pos_11_1.width, pos_11_1.height]
 axes[1,1].set_position(pos_11_2) # set a new position
 
 for m in range(Nr):
     for n in range(Nc):
         axes[m][n].set_axis_off()
 
-letter_annotation(axes[0][0],0,1.27,r'$\mathrm{(a)}$',size=20)
-letter_annotation(axes[0][1], -0.022, 0.97,r'$\mathrm{(b)}$',size=20)
-letter_annotation(axes[1][0], -0.0523, 0.97,r'$\mathrm{(c)}$',size=20)
-letter_annotation(axes[1][1], -0.0523, 0.97,r'$\mathrm{(d)}$',size=20)
-
+letter_annotation(axes[0][0],0,1.27,r'$\mathrm{(a)}$',size=18)
+letter_annotation(axes[0][1], -0.022, 0.97,r'$\mathrm{(b)}$',size=18)
+letter_annotation(axes[1][0], -0.0523, 0.97,r'$\mathrm{(c)}$',size=18)
+letter_annotation(axes[1][1], -0.0523, 0.97,r'$\mathrm{(d)}$',size=18)
 
 plt.show()
 fig.savefig("figures/panel_plots/figure1_CrI3_set_up", dpi=300, bbox_inches='tight')
 #%% 1x2; figure 2 in short paper
-img_TRCD_vary_T = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_T.png')
-img_TRCD_vary_D = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_D.png')
+img_TRCD_vary_T = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_T_more.png')
+img_TRCD_vary_D = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_D_more.png')
 #%% 
 Nr = 1
 Nc = 2
 fig, axes = panel(figsize=(18,6), 
                   nrows=Nr, ncols=Nc, 
                   width_ratios=[1, 1], height_ratios=[1], 
-                  hspace=0, wspace=-0.25)
+                  hspace=0, wspace=-0.1)
 axes[0].imshow(img_TRCD_vary_T)
 axes[1].imshow(img_TRCD_vary_D)
 for n in range(Nc):
     axes[n].set_axis_off()
-letter_annotation(axes[0],0,1.0,r'$\mathrm{(a)}$',size=20)
-letter_annotation(axes[1],0,1.0,r'$\mathrm{(b)}$',size=20)
+letter_annotation(axes[0],0,1.0,r'$\mathrm{(a)}$',size=40)
+letter_annotation(axes[1],0,1.0,r'$\mathrm{(b)}$',size=40)
 fig.subplots_adjust(top=0.99,bottom=0.01,right=0.99,left=0.01)
 
 plt.show()
-fig.savefig('figures/panel_plots/figure2_thermal_RCD.png', dpi=300, bbox_inches='tight')
+fig.savefig('figures/panel_plots/figure2_thermal_RCD_more.png', dpi=300, bbox_inches='tight')
 # %%

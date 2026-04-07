@@ -112,22 +112,71 @@ def plot_lines_with_colorbar(fig, ax, x, y, values_for_color, color_bar_title=''
     norm = mpl.colors.Normalize(vmin=np.min(values_for_color), vmax=np.max(values_for_color))
     cmap = plt.get_cmap(cmap)
 
-    # 2. Plot each line with the corresponding color
-    for i, val in enumerate(values_for_color):
+    # 2. Create ScalarMappable before the loop so colors are available immediately
+    scalar_map = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
+    scalar_map.set_array([])
 
-        # Plot with specific color for this value
-        color = scalar_map.to_rgba(val)
-        ax.plot(x, y[i], 
+    # 3. Plot each line with the corresponding color
+    for i, val in enumerate(values_for_color):
+        ax.plot(x, y[i],
                 color=cmap(norm(val)),
                 alpha=alpha,
                 linestyle=linestyle,
                 linewidth=linewidth)
-
-    # 3. Create corresponding colorbar
-    scalar_map = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
-    scalar_map.set_array([])
     cbar = fig.colorbar(scalar_map, ax=ax)
     cbar.set_label(color_bar_label)
     cbar.ax.set_title(color_bar_title)
 
-    return fig, ax 
+    return fig, ax
+
+
+# ---------------------------------------------------------------------------
+# RCD / pump-probe spectral plotting helpers
+# ---------------------------------------------------------------------------
+
+def plot_frequency_resolved_RCD(ax, w, chi, s_values, ls='-', **kwarg):
+    """
+    Plot frequency-resolved RCD spectra for one or more magnetic-field values.
+
+    Parameters
+    ----------
+    ax           : matplotlib.axes.Axes
+    w            : array_like  frequency axis (ℏω/J)
+    chi          : array_like  RCD spectrum; shape (plot_length, len(w)) or (len(w),)
+    s_values     : array_like  magnetic-field values B/Bs for legend labels
+    ls           : str         line style (default '-')
+    **kwarg      : must contain:
+                     plot_length (int)    number of curves to draw
+                     color (str or list)  colour(s) for the curves
+                     label (str)          base label string
+    """
+    if kwarg['plot_length'] != 1:
+        for j in range(kwarg['plot_length']):
+            ax.plot(w, chi[j], ls=ls, color=kwarg['color'][j],
+                    label=kwarg['label'] + fr' $B={s_values[j]}B_s$')
+    else:
+        ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])
+
+
+def plot_frequency_temperature_resolved_RCD(ax, w, chi, temperatures, ls='-', **kwarg):
+    """
+    Plot frequency-resolved RCD spectra for one or more temperatures.
+
+    Parameters
+    ----------
+    ax           : matplotlib.axes.Axes
+    w            : array_like  frequency axis (ℏω/J)
+    chi          : array_like  RCD spectrum; shape (plot_length, len(w)) or (len(w),)
+    temperatures : array_like  temperature values in K for legend labels
+    ls           : str         line style (default '-')
+    **kwarg      : must contain:
+                     plot_length (int)    number of curves to draw
+                     color (str or list)  colour(s) for the curves
+                     label (str)          base label string
+    """
+    if kwarg['plot_length'] != 1:
+        for j in range(kwarg['plot_length']):
+            ax.plot(w, chi[j], ls=ls, color=kwarg['color'][j],
+                    label=kwarg['label'] + fr' $T={temperatures[j]}K$')
+    else:
+        ax.plot(w, chi, ls=ls, color=kwarg['color'], label=kwarg['label'])

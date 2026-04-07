@@ -196,6 +196,12 @@ J3 = -0.08 # n.n.n.n Heisenberg coupling meV
 D = 0.31 # DMI meV
 Az = 0.49 # anisotropy
 S = 3/2 # spin number
+
+#%% frequency reange
+w = np.linspace(0,20,300)
+len_w = len(w)
+width = (w[1]-w[0])
+
 # %%
 def get_TRCD_vary_D_T_35(D, J1=2.01, J2=0.16, J3=-0.08, Az=0.49, S=3/2):
     """
@@ -230,9 +236,7 @@ berry_array = get_FM_berry_curvature(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
 energy_array = get_energy(J1=J1, J2=J2, J3=J3, D=D, Az=Az, S=S)
 
 # %%
-w = np.linspace(0,20,300)
-len_w = len(w)
-width = (w[1]-w[0])
+
 
 # %% finite temperature with initial state as one magnon occupied at lowest band
 temperatures = np.linspace(0, 48, 49)
@@ -297,13 +301,15 @@ with plt.style.context(['science', 'ieee']):
     clb = fig.colorbar(sm, ax=ax, shrink=0.9)
     
     # Label the colorbar as D, not Chi
-    clb.ax.set_title(r"$T$", loc='left', fontsize=12)
-    clb.set_label(r'$(K)$')
+    clb.ax.set_title(r"$T$", loc='left', fontsize=22)
+    clb.ax.tick_params(labelsize=20)
+    clb.set_label(r'$(K)$', fontsize=20)
 
     # 4. AXIS LABELS
     # Now Y-axis is Chi (Function Value)
-    ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=11)
-    ax.set_ylabel(rf'$\chi(\omega, T)$', fontsize=11)
+    ax.tick_params(axis='both', labelsize=20)
+    ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=22)
+    ax.set_ylabel(rf'$\chi(\omega, T)$', fontsize=22)
     plt.show()
     fig.savefig('figures/thermal_RCD/CrI3_TRCD_vary_T_more.png', dpi=300 ,bbox_inches='tight')
 
@@ -377,13 +383,15 @@ with plt.style.context(['science', 'ieee']):
     clb = fig.colorbar(sm, ax=ax, shrink=0.9)
     
     # Label the colorbar as D, not Chi
-    clb.ax.set_title(r"$D$", loc='left', fontsize=12)
-    clb.set_label(r'$(meV)$')
+    clb.ax.set_title(r"$D$", loc='left', fontsize=22)
+    clb.ax.tick_params(labelsize=20)
+    clb.set_label(r'$(meV)$', fontsize=20)
 
     # 4. AXIS LABELS
     # Now Y-axis is Chi (Function Value)
-    ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=11) # The function value is now the geometry
-    ax.set_ylabel(r'$\chi(\omega,D)$', fontsize=11)
+    ax.tick_params(axis='both', labelsize=20)
+    ax.set_xlabel(r'$\hslash\omega (meV)$', fontsize=22) # The function value is now the geometry
+    ax.set_ylabel(r'$\chi(\omega,D)$', fontsize=22)
     plt.show()
     fig.savefig('figures/thermal_RCD/CrI3_TRCD_vary_D_more.png', dpi=300 ,bbox_inches='tight')
 # %%

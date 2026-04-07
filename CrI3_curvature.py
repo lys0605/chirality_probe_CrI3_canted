@@ -254,7 +254,7 @@ color_bar_title_M = [r"$AM_{+}$",r"$AM_{-}$"]
 color_bar_title_J = [r"$J_{+}$",r"$J_{-}$"]
 # color_bar_title_exact = [r"$$", r"$-\rho_k^{\text{RL}}\sin 2\psi_k$"]
 
-pads = [7, 10]
+pads = [7, 15]
 with plt.style.context(['science','ieee']):
     fig, ax = panel(figsize=(4,3), nrows=1, ncols=1, width_ratios=[1], height_ratios=[1], hspace=0.1, wspace=0.4)
 
@@ -265,18 +265,18 @@ with plt.style.context(['science','ieee']):
     plot(honeycomb_bz_x, honeycomb_bz_y, ax=ax, linestyle='-', linewidth=1, color='k')
 
     clb = fig.colorbar(pc, ax=ax, shrink=0.9)
-    clb.ax.set_title(color_bar_title[1], loc='left', fontsize=16, pad=pads[1])
-    clb.ax.tick_params(labelsize=16)
+    clb.ax.set_title(color_bar_title[1], loc='left', fontsize=24, pad=pads[1])
+    clb.ax.tick_params(labelsize=24)
     ax.set_axis_on() # make sure the axis is on
     ax.grid(False) # make sure the grid is off
 
     ax.set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-    ax.set_xticklabels(['-1', '0', '1'], fontsize=16)
+    ax.set_xticklabels(['-1', '0', '1'], fontsize=24)
     ax.set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-    ax.set_yticklabels(['-1', '0', '1'], fontsize=16)
+    ax.set_yticklabels(['-1', '0', '1'], fontsize=24)
 
-    ax.set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-    ax.set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
+    ax.set_xlabel(r'$k_x(\pi/a)$', fontsize=28)
+    ax.set_ylabel(r'$k_y(\pi/a)$', fontsize=28)
     plt.show()
 # %%
 fig.savefig('figures/CrI3_berry_curvatures/CrI3_berry_curvature_lower.png', dpi=300 ,bbox_inches='tight')
