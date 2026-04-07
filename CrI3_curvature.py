@@ -254,7 +254,7 @@ color_bar_title_M = [r"$AM_{+}$",r"$AM_{-}$"]
 color_bar_title_J = [r"$J_{+}$",r"$J_{-}$"]
 # color_bar_title_exact = [r"$$", r"$-\rho_k^{\text{RL}}\sin 2\psi_k$"]
 
-pads = [7, 15]
+pads = [7, 12]
 with plt.style.context(['science','ieee']):
     fig, ax = panel(figsize=(4,3), nrows=1, ncols=1, width_ratios=[1], height_ratios=[1], hspace=0.1, wspace=0.4)
 

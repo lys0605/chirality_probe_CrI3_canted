@@ -9,6 +9,16 @@ from CrI3_raman_scattering import get_RCD, get_energy
 from CrI3_curvature import get_FM_berry_curvature
 import scienceplots
 # %%
+data = np.load('chi_FM_computed.npz')
+chi_FM_lower_T = data['chi_FM_lower_T']
+chi_FM_upper_T = data['chi_FM_upper_T']
+chi_FM_lower_D = data['chi_FM_lower_D']
+chi_FM_upper_D = data['chi_FM_upper_D']
+temperatures   = data['temperatures']
+D_array        = data['D_array']
+w              = data['w']
+
+# %%
 def gaussian_function(x, x0=0, width=1e-3):
     """
     1D Gaussian function
@@ -252,6 +262,16 @@ for j in range(len_T):
     for i in range(len_w):
         chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1], T=temperatures[j])*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
         chi_FM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[1], T=temperatures[j])*RCD_array * gaussian_function(w[i], x0= np.abs(energy_array[1]-energy_array[0]), width=width))/partition_array[j]
+
+# %% save computed chi arrays
+np.savez('chi_FM_computed.npz',
+         chi_FM_lower_T=chi_FM_lower_T,
+         chi_FM_upper_T=chi_FM_upper_T,
+         chi_FM_lower_D=chi_FM_lower_D,
+         chi_FM_upper_D=chi_FM_upper_D,
+         temperatures=temperatures,
+         D_array=D_array,
+         w=w)
 
 # %% dos weighted CrI3 at zero T
 dos_weighted_FM= np.zeros(len_w)
