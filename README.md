@@ -25,6 +25,7 @@
 - [Module architecture](#module-architecture)
 - [Julia code](#julia-code)
 - [Citation](#citation)
+- [AI assistance](#ai-assistance)
 - [License](#license)
 
 ---
@@ -254,6 +255,22 @@ on the honeycomb lattice. Zenodo. https://doi.org/10.5281/zenodo.19884757
 ```
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19884757.svg)](https://doi.org/10.5281/zenodo.19884757)
+
+---
+
+## AI assistance
+
+[Claude Code](https://claude.ai/code) (Anthropic) was used to assist with the **refactoring and organisation** of this codebase in preparation for public data availability. Specifically, Claude helped with:
+
+- Reorganising files into the `common/`, `CrI3/`, and `canted/` package structure
+- Renaming modules (`parameters.py` → `model_parameters.py`, `thermal.py` → `bose_statistics.py`)
+- Updating all import statements consistently across the repository
+- Extracting shared code into `CrI3/CrI3_model.py` to eliminate duplication
+- Adding `if __name__ == '__main__':` guards to prevent side-effects on import
+- Writing inline documentation comments and `# TODO` / `# FIXME` annotations
+- Writing this README
+
+All physical models, equations, and scientific results were developed by the author.
 
 ---
 
