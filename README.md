@@ -117,8 +117,7 @@ chirality-probe/
 │   ├── pump_probe.py              # T = 0 frequency-resolved RCD
 │   └── finite_temperature_pump_probe.py   # Finite-T RCD χ(ω, T)
 │
-├── scripts/
-│   └── panel_plot.py              # Assemble multi-panel publication figures
+├── common/panel_plot.py           # Assemble multi-panel publication figures
 │
 ├── figures/                       # Output figures (auto-generated)
 ├── LICENSE
@@ -157,7 +156,7 @@ python canted/pump_probe.py
 python canted/finite_temperature_pump_probe.py
 
 # Assemble multi-panel publication figures (requires pre-generated PNGs)
-python scripts/panel_plot.py
+python common/panel_plot.py
 ```
 
 > **Note — `CrI3_pump_probe.py`** loads `CrI3/chi_FM_computed.npz` on startup.
@@ -218,7 +217,7 @@ common/
               CrI3/ scripts        canted/ scripts
                                    pump_probe.py
                                    finite_temperature_pump_probe.py
-                          scripts/panel_plot.py
+                          common/panel_plot.py
 ```
 
 **`common/` module summary**
@@ -231,6 +230,7 @@ common/
 | `bose_statistics.py` | `bose_einstein(E,T)`, `boltzmann_factor(E,T)`, `occupation_function(E,T)` |
 | `plot_utils.py` | `plot()`, `panel()`, `panel_unequal()`, `letter_annotation()`, `plot_lines_with_colorbar()`, `plot_frequency_resolved_RCD()` |
 | `mathfuntion.py` | Backward-compatibility shim — re-exports `math_utils` |
+| `panel_plot.py` | Loads pre-generated PNGs and assembles multi-panel publication figures |
 
 ---
 
