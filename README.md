@@ -2,6 +2,7 @@
 
 > Numerical study of **Raman Circular Dichroism (RCD)** and magnon topology in magnetically ordered materials on the honeycomb lattice.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19884757.svg)](https://doi.org/10.5281/zenodo.19884757)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![NumPy](https://img.shields.io/badge/NumPy-1.21%2B-013243?logo=numpy&logoColor=white)](https://numpy.org/)
@@ -23,6 +24,7 @@
 - [Unit conventions](#unit-conventions)
 - [Module architecture](#module-architecture)
 - [Julia code](#julia-code)
+- [Citation](#citation)
 - [License](#license)
 
 ---
@@ -237,6 +239,19 @@ common/
 Higher-performance versions of the Berry curvature and Chern number
 calculations are implemented in Julia (`.jl` files in the project root)
 for parameter sweeps where the Python k-space loops are too slow.
+
+---
+
+## Citation
+
+If you use this code, please cite it via Zenodo:
+
+```
+Ying Shing Liu. (2026). Chirality Probe: Raman Circular Dichroism and magnon topology
+on the honeycomb lattice. Zenodo. https://doi.org/10.5281/zenodo.19884757
+```
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19884757.svg)](https://doi.org/10.5281/zenodo.19884757)
 
 ---
 
