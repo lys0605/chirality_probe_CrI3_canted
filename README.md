@@ -44,7 +44,7 @@ This repository contains the Python source code accompanying the manuscript on c
 |--------|-------------|-------------|
 | **CrI₃** | Ferromagnetic honeycomb van der Waals insulator | `CrI3/` |
 | **Canted AFM** | Canted antiferromagnet on honeycomb lattice | `canted/` |
-| **Pump–probe / finite-T** | Time-resolved and finite-temperature RCD | `pump_probe.py`, `finite_temperature_pump_probe.py` |
+| **Pump–probe / finite-T** | Time-resolved and finite-temperature RCD | `canted/pump_probe.py`, `canted/finite_temperature_pump_probe.py` |
 
 ---
 
@@ -111,11 +111,12 @@ chirality-probe/
 │   ├── canted_chern_number.py     # Berry curvature and Chern number vs (B, D)
 │   ├── canted_curvature.py        # RCD Berry curvature on BZ
 │   ├── canted_RCD.py              # RCD amplitudes (exact & LMC methods)
-│   └── canted_raman_cross_section.py  # Raman cross-section on BZ mesh
+│   ├── canted_raman_cross_section.py  # Raman cross-section on BZ mesh
+│   ├── pump_probe.py              # T = 0 frequency-resolved RCD
+│   └── finite_temperature_pump_probe.py   # Finite-T RCD χ(ω, T)
 │
-├── pump_probe.py                  # T = 0 frequency-resolved RCD
-├── finite_temperature_pump_probe.py   # Finite-T RCD χ(ω, T)
-├── panel_plot.py                  # Assemble multi-panel publication figures
+├── scripts/
+│   └── panel_plot.py              # Assemble multi-panel publication figures
 │
 ├── figures/                       # Output figures (auto-generated)
 ├── LICENSE
@@ -138,7 +139,7 @@ python CrI3/CrI3_curvature.py
 # CrI3 Raman cross-section and RCD map
 python CrI3/CrI3_raman_scattering.py
 
-# CrI3 finite-temperature RCD spectra (saves chi_FM_computed.npz)
+# CrI3 finite-temperature RCD spectra (saves CrI3/chi_FM_computed.npz)
 python CrI3/CrI3_pump_probe.py
 
 # Canted AFM band structure
@@ -148,13 +149,13 @@ python canted/canted_energy_band.py
 python canted/canted_chern_number.py
 
 # T = 0 pump-probe RCD (canted AFM)
-python pump_probe.py
+python canted/pump_probe.py
 
 # Finite-T RCD (canted AFM)
-python finite_temperature_pump_probe.py
+python canted/finite_temperature_pump_probe.py
 
 # Assemble multi-panel publication figures (requires pre-generated PNGs)
-python panel_plot.py
+python scripts/panel_plot.py
 ```
 
 > **Note — `CrI3_pump_probe.py`** loads `CrI3/chi_FM_computed.npz` on startup.
@@ -173,8 +174,8 @@ python panel_plot.py
 | Quantum geometric tensor | g(**k**) | `CrI3/CrI3_curvature.py` |
 | Chern number | *C* | `canted/canted_chern_number.py` |
 | Raman cross-section | σ(**k**) | `CrI3/CrI3_raman_scattering.py`, `canted/canted_raman_cross_section.py` |
-| RCD spectrum | χ(ω) | `canted/canted_RCD.py`, `pump_probe.py` |
-| Finite-T RCD | χ(ω, T) | `CrI3/CrI3_pump_probe.py`, `finite_temperature_pump_probe.py` |
+| RCD spectrum | χ(ω) | `canted/canted_RCD.py`, `canted/pump_probe.py` |
+| Finite-T RCD | χ(ω, T) | `CrI3/CrI3_pump_probe.py`, `canted/finite_temperature_pump_probe.py` |
 
 ---
 
@@ -213,7 +214,9 @@ common/
                               ↑
                     ┌─────────┴──────────┐
               CrI3/ scripts        canted/ scripts
-              pump_probe.py        finite_temperature_pump_probe.py
+                                   pump_probe.py
+                                   finite_temperature_pump_probe.py
+                          scripts/panel_plot.py
 ```
 
 **`common/` module summary**
