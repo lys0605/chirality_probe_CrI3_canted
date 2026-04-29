@@ -69,6 +69,12 @@ calculation, and producing figures.
 ║                          plot_lines_with_colorbar()                  ║
 ║                          plot_frequency_resolved_RCD()               ║
 ║                          plot_frequency_temperature_resolved_RCD()   ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                      CrI₃ MODEL MODULE                               ║
+║                                                                      ║
+║  CrI3_model.py      ─── core CrI3 FM magnon Hamiltonian              ║
+║                          NN, NNN, NNNN  (bond-vector constants)      ║
+║                          FM_eigs_exact(k, ...)  Bogoliubov solver    ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -83,7 +89,11 @@ honeycomb_lattice.py    math_utils.py    plot_utils.py
          ↑                   ↑                ↑
          └───────────────────┴────────────────┘
                              ↑
-                   [calculation scripts]
+                       CrI3_model.py   ← shared CrI3 Hamiltonian
+                             ↑
+                   [CrI3 calculation scripts]
+
+                   [canted / pump-probe scripts]  ← no CrI3_model dep
 ```
 
 > `mathfuntion.py` is kept as a backward-compatibility shim that
@@ -129,10 +139,12 @@ plot_utils.py                 all plotting helpers
 mathfuntion.py                backward-compat shim → re-exports math_utils
 
 ── CrI₃ scripts ─────────────────────────────────────────────────────────
+CrI3_model.py                 bond-vector constants (NN/NNN/NNNN) and
+                              FM_eigs_exact — shared by all CrI3 scripts
 CrI3_band.py                  magnon band structure along high-sym path
 CrI3_curvature.py             Berry curvature and quantum metric on BZ
 CrI3_raman_scattering.py      Raman cross-section and RCD k-maps
-CrI3_pump_probe.py            pump–probe RCD spectra
+CrI3_pump_probe.py            finite-T RCD spectra χ(ω,T) and χ(ω,D)
 
 ── Canted AFM scripts ───────────────────────────────────────────────────
 canted_energy_band.py         magnon band structure
