@@ -1,3 +1,5 @@
 {
-    "julia.environmentPath": "/Users/lys/Documents/Thesis/Research code/Chirality Probe/julia/magnons"
+    "julia.environmentPath": "/Users/lys/Documents/Thesis/Research code/Chirality Probe/julia/magnons",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }

@@ -70,7 +70,7 @@ def raman_cross_section_ham(k,qq=0,J=1,D=0.1,S=5/2,B0=0.5):
     '''
     # field
     Bs = 3*J*S # not 6JS here
-    B = (B0-0.001)*Bs
+    B = (B0+1e-6)*Bs
     s = B/Bs
     
     # parameters
@@ -119,6 +119,12 @@ def raman_cross_section_ham(k,qq=0,J=1,D=0.1,S=5/2,B0=0.5):
     e_out_1 = (1/np.sqrt(2))*np.array([-np.sin(phi)-1j*zeta*np.cos(phi)*np.cos(theta),np.cos(phi)-1j*zeta*np.sin(phi)*np.cos(theta)])
     e_out_2 = (1/np.sqrt(2))*np.array([-np.sin(phi)+1j*zeta*np.cos(phi)*np.cos(theta),np.cos(phi)+1j*zeta*np.sin(phi)*np.cos(theta)])
     
+    #
+    e_in_1 = (1/np.sqrt(2))*np.array([1, -1j]) # L 
+    e_in_2 = (1/np.sqrt(2))*np.array([1, 1j]) # R
+    e_out_1 = (1/np.sqrt(2))*np.array([1, -1j]) # R
+    e_out_2 = (1/np.sqrt(2))*np.array([1, 1j]) # L
+
     # if zeta = 1
     # g-factor
     # LR (e_out = L, e_in = R -> ss' = RL)
@@ -276,7 +282,7 @@ def get_raman_cross_section(qq=0, J=1, D=0.1, S=5/2, B0=0.5):
             p_23[i,j] = np.abs(Hr_qq[1,2])**2
             
         if i%50 == 0:
-            print(f'{i}: done')
+            print(f'{i}: done with parameters J={J}, D={D}, S={S}, B0={B0}')
     return p_13,p_24,p_12,p_34,p_14,p_23
 
 
@@ -547,13 +553,13 @@ def get_raman_cross_section_exact(J=1,D=0.1,S=5/2,B0=0.5, f=1):
 # %%
 
 J = 1 # meV
-D = 0.1 # D/J = 0.1
+D = 0 # D/J = 0.1
 S = 5 # spin number
-s = 0.74 # saturation field ratio (sin\theta) = B/Bs
+s = 0.0 # saturation field ratio (sin\theta) = B/Bs
 
 # %% RL
-s_values = [0.75,]
-D_values = [0.1]
+s_values = [0,]
+D_values = [0]
 raman_cross_sections_RL = [np.array(get_raman_cross_section(qq=0,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
 raman_cross_sections_RR = [np.array(get_raman_cross_section(qq=1,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
 raman_cross_sections_LL = [np.array(get_raman_cross_section(qq=2,J=J,D=D,S=S,B0=s)) for s in s_values for D in D_values]
@@ -612,7 +618,7 @@ with plt.style.context(['science','ieee']):
     fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
 
     for i in range(1):
-        pc = axes.pcolormesh(kx, ky, RCD[0][2*1], cmap="jet")
+        pc = axes.pcolormesh(kx, ky, raman_cross_sections_LR[0][5], cmap="jet")
         
         plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes, linestyle='-', linewidth=1, color='k')
 
@@ -633,4 +639,6 @@ with plt.style.context(['science','ieee']):
         axes.set_title(title[2], fontsize=18)
     plt.show()
    #fig.savefig('figures/raman_scattering/raman_cross_section_RL_FM_upper.png', dpi=300)
+# %%
+
 # %%

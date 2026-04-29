@@ -225,7 +225,7 @@ plt.show()
 fig.savefig("figures/panel_plots/figure6_chern_curvature_noFM_FM.png",dpi=300, bbox_inches = "tight")
 # %%
 # 2x2 CrI3
-img_set_up_CrI3 = Image.open('figures/set_up_CrI3.png')
+img_set_up_CrI3 = Image.open('figures/concept_maps/setup_3D.png')
 img_CrI3_bands = Image.open('figures/CrI3_bands/CrI3_band_structure.png')
 img_CrI3_berry_curvature_upper = Image.open('figures/CrI3_berry_curvatures/CrI3_berry_curvature_upper.png')
 img_CrI3_berry_curvature_lower = Image.open('figures/CrI3_berry_curvatures/CrI3_berry_curvature_lower.png')
@@ -268,13 +268,14 @@ for m in range(Nr):
     for n in range(Nc):
         axes[m][n].set_axis_off()
 
-letter_annotation(axes[0][0],0,1.27,r'$\mathrm{(a)}$',size=18)
+letter_annotation(axes[0][0],0,1.17,r'$\mathrm{(a)}$',size=18)
 letter_annotation(axes[0][1], -0.022, 0.97,r'$\mathrm{(b)}$',size=18)
 letter_annotation(axes[1][0], -0.0523, 0.97,r'$\mathrm{(c)}$',size=18)
 letter_annotation(axes[1][1], -0.0523, 0.97,r'$\mathrm{(d)}$',size=18)
 
 plt.show()
 fig.savefig("figures/panel_plots/figure1_CrI3_set_up", dpi=300, bbox_inches='tight')
+
 #%% 1x2; figure 2 in short paper
 img_TRCD_vary_T = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_T_more.png')
 img_TRCD_vary_D = Image.open('figures/thermal_RCD/CrI3_TRCD_vary_D_more.png')
