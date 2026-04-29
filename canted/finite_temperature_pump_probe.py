@@ -1,4 +1,9 @@
 # %%
+# NOTE: This script is incomplete (work in progress).
+# Goal: finite-temperature RCD spectra chi(omega, T) for the canted AFM,
+# analogous to CrI3/CrI3_pump_probe.py for the ferromagnet.
+# Several sections are not yet functional and are commented out with TODO/FIXME notes.
+
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -6,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from common.plot_utils import (plot, letter_annotation, panel,
-                        plot_frequency_resolved_RCD,
-                        plot_frequency_temperature_resolved_RCD)
+                               plot_frequency_resolved_RCD,
+                               plot_frequency_temperature_resolved_RCD)
 from common.math_utils import gaussian_function, lorentzian_function, normalize
 from common.bose_statistics import bose_einstein, boltzmann_factor, occupation_function
 from common.honeycomb_lattice import *
@@ -23,16 +28,18 @@ def partition_function(energy_array, T=0, mu=0):
 
     Parameters
     ----------
-    energy_array : ndarray  magnon energies on the BZ k-mesh (meV)
+    energy_array : ndarray  magnon energies on the BZ k-mesh
     T            : float    temperature in K
-    mu           : float    chemical potential in meV (default 0)
+    mu           : float    chemical potential (default 0)
     """
     return np.exp(
         bz_integration_honeycomb(
             np.log(1 / (1 - boltzmann_factor(energy_array, T=T, mu=mu)))
         ) / (2 * np.pi) ** 2
     )
-# %% canting
+
+
+# %% Canted AFM — Raman arrays for each canting value B/Bs
 J = 1
 D = 0.1
 S = 5/2
@@ -40,241 +47,148 @@ s_values = [0, 0.25, 0.5, 0.75, 1]
 
 raman_array = [get_raman_cross_section_exact(J=J, D=D, S=S, B0=s) for s in s_values]
 
-#%% CrI3
-J = 2.01
-D = 0.31
-S = 3 # since we divid it by 2 in the function
-s_values = [0, 0.25, 0.5, 0.75, 1]
-
-raman_array_FM = get_raman_cross_section_exact(J=J, D=D, S=S, B0=s_values[4])
-
-#%%
 len_s = len(s_values)
-cross_section_array = np.array([raman_array[i][0] for i in range(len_s)])
-berry_array = np.array([raman_array[i][1] for i in range(len_s)])
-berry_rcd_array = np.array([raman_array[i][2] for i in range(len_s)])
-energy_array = np.array([raman_array[i][3] for i in range(len_s)])
-
-#%% CrI3
-len_s = len(s_values)
-cross_section_array = np.array(raman_array_FM[0])
-berry_array = np.array(raman_array_FM[1])
-berry_rcd_array = np.array(raman_array_FM[2])
-energy_array = np.array(raman_array_FM[3])
+cross_section_array = np.array([raman_array[i][0] for i in range(len_s)])  # (len_s, 6, N, N)
+berry_array         = np.array([raman_array[i][1] for i in range(len_s)])  # (len_s, 2, N, N)
+berry_rcd_array     = np.array([raman_array[i][2] for i in range(len_s)])
+energy_array        = np.array([raman_array[i][3] for i in range(len_s)])  # (len_s, 2, N, N)
+# energy_array[j][0] = upper band for canting j
+# energy_array[j][1] = lower band for canting j
 
 # %%
-w = np.linspace(0,37.5,300)
-len_w = len(w)
-width = (w[1]-w[0])*2
+w      = np.linspace(0, 25, 200)
+len_w  = len(w)
+width  = (w[1] - w[0]) * 2
 
-# %% finite temperature with initial state as one magnon occupied at lowest band
-temperatures = [0, 2, 10, 18, 26, 34, 42, 50, 58]
-temp = temperatures[5]
-partition_array = np.array([partition_function(energy_array[0], T=T)*partition_function(energy_array[1], T=T) for T in temperatures])
-# %%
+# %% Temperature grid
+temperatures = [0, 2, 4, 6, 24, 58]
+len_T        = len(temperatures)
+temp         = temperatures[3]   # single temperature used in the fixed-T chi loops below
+
+# TODO: partition_array should be computed per (canting j, temperature T) pair for the
+# full canted finite-T calculation.  Current placeholder computes it for a single
+# canting (j=0) across all temperatures, mirroring the CrI3 pattern.
+# Generalise to shape (len_s, len_T) when implementing the full sweep.
+partition_array = np.array([
+    partition_function(energy_array[0][0], T=T) * partition_function(energy_array[0][1], T=T)
+    for T in temperatures
+])
+
+# %% chi at fixed temperature `temp`, varying canting j
+# Convention for cross_section_array[j] channel indices (from canted_raman_cross_section):
+#   [0] two-magnon upper,  [1] two-magnon lower
+#   [2] FM upper,          [3] FM lower
+#   [4] AFM upper,         [5] AFM lower
 chi_two_magnons_lower_T = np.zeros((len_s, len_w))
-chi_AFM_lower_T = np.zeros((len_s, len_w))
-chi_FM_lower_T = np.zeros((len_s, len_w))
 chi_two_magnons_upper_T = np.zeros((len_s, len_w))
-chi_AFM_upper_T = np.zeros((len_s, len_w))
-chi_FM_upper_T = np.zeros((len_s, len_w))
+chi_AFM_lower_T         = np.zeros((len_s, len_w))
+chi_AFM_upper_T         = np.zeros((len_s, len_w))
+chi_FM_lower_T          = np.zeros((len_s, len_w))
+chi_FM_upper_T          = np.zeros((len_s, len_w))
 
 for j in range(len_s):
     for i in range(len_w):
-        chi_two_magnons_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][1] * gaussian_function(w[i], x0= 2*energy_array[j][1], width=width))
-        chi_two_magnons_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][0] * gaussian_function(w[i], x0= 2*energy_array[j][0], width=width))
-        chi_AFM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][5] * gaussian_function(w[i], x0= energy_array[j][1]+energy_array[j][0], width=width))
-        chi_AFM_upper_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][4] * gaussian_function(w[i], x0= energy_array[j][1]+energy_array[j][0], width=width))
-        chi_FM_lower_T[j][i] = bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][3] * gaussian_function(w[i], x0= np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
-        chi_FM_upper_T[j][i] =bz_integration_honeycomb( boltzmann_factor(energy_array[j][1],T=temp)*cross_section_array[j][2] * gaussian_function(w[i], x0= np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
+        weight = boltzmann_factor(energy_array[j][1], T=temp)
+        chi_two_magnons_lower_T[j][i] = bz_integration_honeycomb(weight * cross_section_array[j][1] * gaussian_function(w[i], x0=2 * energy_array[j][1],                                   width=width))
+        chi_two_magnons_upper_T[j][i] = bz_integration_honeycomb(weight * cross_section_array[j][0] * gaussian_function(w[i], x0=2 * energy_array[j][0],                                   width=width))
+        chi_AFM_lower_T[j][i]         = bz_integration_honeycomb(weight * cross_section_array[j][5] * gaussian_function(w[i], x0=energy_array[j][1] + energy_array[j][0],                 width=width))
+        chi_AFM_upper_T[j][i]         = bz_integration_honeycomb(weight * cross_section_array[j][4] * gaussian_function(w[i], x0=energy_array[j][1] + energy_array[j][0],                 width=width))
+        chi_FM_lower_T[j][i]          = bz_integration_honeycomb(weight * cross_section_array[j][3] * gaussian_function(w[i], x0=np.abs(energy_array[j][1] - energy_array[j][0]),         width=width))
+        chi_FM_upper_T[j][i]          = bz_integration_honeycomb(weight * cross_section_array[j][2] * gaussian_function(w[i], x0=np.abs(energy_array[j][1] - energy_array[j][0]),         width=width))
 
-# %% dos
+# %% Bare DOS
 dos_two_magnons_lower = np.zeros((len_s, len_w))
 dos_two_magnons_upper = np.zeros((len_s, len_w))
-dos_AFM = np.zeros((len_s, len_w))
-dos_FM = np.zeros((len_s, len_w)) # FM interband
+dos_AFM               = np.zeros((len_s, len_w))
+dos_FM                = np.zeros((len_s, len_w))
 
 for j in range(len_s):
     for i in range(len_w):
-        dos_two_magnons_lower[j][i] = bz_integration_honeycomb(gaussian_function(w[i], x0=2*energy_array[j][1], width=width))
-        dos_two_magnons_upper[j][i] = bz_integration_honeycomb(gaussian_function(w[i], x0=2*energy_array[j][0], width=width))
-        dos_AFM[j][i] = bz_integration_honeycomb(gaussian_function(w[i], x0=energy_array[j][1]+energy_array[j][0], width=width))
-        dos_FM[j][i] = bz_integration_honeycomb(gaussian_function(w[i], x0=np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
+        dos_two_magnons_lower[j][i] = bz_integration_honeycomb(gaussian_function(w[i], x0=2 * energy_array[j][1],                               width=width))
+        dos_two_magnons_upper[j][i] = bz_integration_honeycomb(gaussian_function(w[i], x0=2 * energy_array[j][0],                               width=width))
+        dos_AFM[j][i]               = bz_integration_honeycomb(gaussian_function(w[i], x0=energy_array[j][1] + energy_array[j][0],              width=width))
+        dos_FM[j][i]                = bz_integration_honeycomb(gaussian_function(w[i], x0=np.abs(energy_array[j][1] - energy_array[j][0]),      width=width))
 
-# %% dos weighted
+# %% Berry-curvature-weighted DOS
 dos_weighted_two_magnons_lower = np.zeros((len_s, len_w))
 dos_weighted_two_magnons_upper = np.zeros((len_s, len_w))
-dos_weighted_AFM_upper = np.zeros((len_s, len_w))
-dos_weighted_AFM_lower = np.zeros((len_s, len_w))
-dos_weighted_FM= np.zeros((len_s, len_w))
+dos_weighted_AFM_upper         = np.zeros((len_s, len_w))
+dos_weighted_AFM_lower         = np.zeros((len_s, len_w))
+dos_weighted_FM                = np.zeros((len_s, len_w))
 
 for j in range(len_s):
     for i in range(len_w):
-        dos_weighted_two_magnons_lower[j][i] = bz_integration_honeycomb(berry_array[j][1]*gaussian_function(w[i], x0=2*energy_array[j][1], width=width))
-        dos_weighted_two_magnons_upper[j][i] = bz_integration_honeycomb(berry_array[j][0]*gaussian_function(w[i], x0=2*energy_array[j][0], width=width))
-        dos_weighted_AFM_upper[j][i] = bz_integration_honeycomb(berry_array[j][0]*gaussian_function(w[i], x0=energy_array[j][1]+energy_array[j][0], width=width))
-        dos_weighted_AFM_lower[j][i] = bz_integration_honeycomb(berry_array[j][1]*gaussian_function(w[i], x0=energy_array[j][1]+energy_array[j][0], width=width))
-        dos_weighted_FM[j][i] = bz_integration_honeycomb(berry_array[j][1]*gaussian_function(w[i], x0=np.abs(energy_array[j][1]-energy_array[j][0]), width=width))
+        dos_weighted_two_magnons_lower[j][i] = bz_integration_honeycomb(berry_array[j][1] * gaussian_function(w[i], x0=2 * energy_array[j][1],                               width=width))
+        dos_weighted_two_magnons_upper[j][i] = bz_integration_honeycomb(berry_array[j][0] * gaussian_function(w[i], x0=2 * energy_array[j][0],                               width=width))
+        dos_weighted_AFM_upper[j][i]         = bz_integration_honeycomb(berry_array[j][0] * gaussian_function(w[i], x0=energy_array[j][1] + energy_array[j][0],              width=width))
+        dos_weighted_AFM_lower[j][i]         = bz_integration_honeycomb(berry_array[j][1] * gaussian_function(w[i], x0=energy_array[j][1] + energy_array[j][0],              width=width))
+        dos_weighted_FM[j][i]                = bz_integration_honeycomb(berry_array[j][1] * gaussian_function(w[i], x0=np.abs(energy_array[j][1] - energy_array[j][0]),      width=width))
 
-# %% dos weighted CrI3
-dos_weighted_FM= np.zeros( len_w)
-
-for i in range(len_w):
-    dos_weighted_FM[i] = bz_integration_honeycomb(berry_array[1]*gaussian_function(w[i], x0=np.abs(energy_array[1]-energy_array[0]), width=width))
-
-#%%
-print(np.max(energy_array[1]))
-print(np.max(boltzmann_factor(11, T=61)/partition_array))
-print(len_T)
 # %%
-rcd_label = [r'$\chi_{\alpha^{\prime}\bar{\alpha}^\prime}$',r'$\chi_{\beta^{\prime}\bar{\beta}^\prime}$',
+rcd_label = [r'$\chi_{\alpha^{\prime}\bar{\alpha}^\prime}$', r'$\chi_{\beta^{\prime}\bar{\beta}^\prime}$',
              r'$\chi_{\alpha^{\prime}\beta}$', r'$\chi_{\bar{\beta}^{\prime}\bar{\alpha}}$',
-             r'$\chi_{\alpha^{\prime}\bar{\beta}^\prime}$', r'$\chi_{\beta^{\prime}\alpha^\prime}$'
-            ]
-# chi_vacuum = chi_two_magnons_lower+chi_two_magnons_upper+chi_AFM_lower+chi_AFM_upper
-# chi_one_magnon = 2*chi_two_magnons_lower+chi_two_magnons_upper+2*chi_AFM_lower+chi_AFM_upper+chi_FM_upper
-# chi_vacuum_finite_T = chi_vacuum/partition_array[0]
-# chi_one_magnon_finite_T = (2*chi_two_magnons_lower_T+chi_two_magnons_upper_T+2*chi_AFM_lower_T+chi_AFM_upper_T+chi_FM_upper_T)
+             r'$\chi_{\alpha^{\prime}\bar{\beta}^\prime}$', r'$\chi_{\beta^{\prime}\alpha^\prime}$']
 
-# dos_weighted_vacuum = dos_weighted_two_magnons_lower+dos_weighted_two_magnons_upper+dos_weighted_AFM_lower+dos_weighted_AFM_upper
-# dos_weighted_one_magnon = 2*dos_weighted_two_magnons_lower+dos_weighted_two_magnons_upper+2*dos_weighted_AFM_lower+dos_weighted_AFM_upper+dos_weighted_FM
+# TODO: compute chi_vacuum, chi_one_magnon, and their dos_weighted counterparts,
+# then divide by partition_array to get the proper finite-T normalised spectra.
+# chi_vacuum       = chi_two_magnons_lower_T + chi_two_magnons_upper_T + chi_AFM_lower_T + chi_AFM_upper_T
+# chi_one_magnon   = 2*chi_two_magnons_lower_T + chi_two_magnons_upper_T + 2*chi_AFM_lower_T + chi_AFM_upper_T + chi_FM_upper_T
+# dos_weighted_vacuum     = dos_weighted_two_magnons_lower + dos_weighted_two_magnons_upper + dos_weighted_AFM_lower + dos_weighted_AFM_upper
+# dos_weighted_one_magnon = 2*dos_weighted_two_magnons_lower + dos_weighted_two_magnons_upper + 2*dos_weighted_AFM_lower + dos_weighted_AFM_upper + dos_weighted_FM
 
-colors_vacuum = ['#00215d', '#0071bc' , '#8fd0ff']
-colors_one_magnon = ['#b6000f' , '#ff814b', '#ffc883']
-colors_temperature = ['#1a1a1a',  '#192225' , '#143349' , '#245074', '#2f6fa4', '#3989d6', '#76a1ff', '#aaceff', '#e1f0ff']
+colors_vacuum      = ['#00215d', '#0071bc', '#8fd0ff']
+colors_one_magnon  = ['#b6000f', '#ff814b', '#ffc883']
+colors_temperature = ['#1a1a1a', '#192225', '#143349', '#245074', '#2f6fa4', '#3989d6']
 
-with plt.style.context(['science','ieee']):
-    fig, ax = plt.subplots(figsize=(4,3))
-    #plot_frequency_resolved_RCD(w, chi_vacuum[1:4], s_values[1:4], plot_length=3, color=colors_vacuum, label=r'')
-    # plot_frequency_resolved_RCD(ax, w, chi_vacuum_finite_T[1:4], s_values[0:3], plot_length=3, color=colors_vacuum[0:3], label=r'')
-    # plot_frequency_resolved_RCD(ax, w, dos_weighted_one_magnon[3], s_values[0], ls='--', plot_length=1, color='black', label=r'$\Lambda^\prime$')
+# %% Plot chi(omega, T) — FM channel at fixed canting, one curve per canting j
+# TODO: replace the canting sweep with a proper temperature sweep (loop over temperatures)
+# to produce chi(omega, T) at a fixed canting, mirroring CrI3/CrI3_pump_probe.py.
+with plt.style.context(['science', 'ieee']):
+    fig, ax = plt.subplots(figsize=(4, 3))
     plot_frequency_temperature_resolved_RCD(ax, w, chi_FM_lower_T, temperatures, plot_length=len_T, color=colors_temperature, label=r'')
-    plot_frequency_resolved_RCD(ax, w, dos_weighted_FM, s_values[-1], plot_length=1, ls='--', color=colors_one_magnon[1], label=r'weighted DOS')
-    #plt.axvline(w[np.argmin(chi_FM_upper[1])])
-    #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
-    #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
     ax.set_xlabel(r'$\hslash\omega/J$', fontsize=13)
-    ax.set_ylabel(rf'$\chi(\omega, T)$', fontsize=13)
-    ax.legend(loc="lower right", bbox_to_anchor=(1.7, -0.2) , fontsize=13)
+    ax.set_ylabel(r'$\chi(\omega, T)$', fontsize=13)
+    ax.legend(loc="lower right", bbox_to_anchor=(1.7, -0.2), fontsize=13)
     plt.show()
-    #fig.savefig('frequency_resolved_RCD_one_magnon.png', dpi=600, bbox_inches='tight')
+    # fig.savefig('figures/pump_probe/canted_TRCD_FM_vary_T.png', dpi=300, bbox_inches='tight')
 
-#%%
-with plt.style.context(['science','ieee']):
-    fig = plt.figure(figsize=(4,6))
-    gs = fig.add_gridspec(2, hspace=0)
-    axes = gs.subplots(sharex=True)
-    for ax in axes:
-        ax.set_box_aspect(0.75)
-    
-    plot_frequency_resolved_RCD(axes[0], w, chi_vacuum[1:4], s_values[0:3], plot_length=3, color=colors_vacuum, label=r'')
-    plot_frequency_resolved_RCD(axes[1], w, chi_one_magnon[1:4], s_values[0:3], plot_length=3, color=colors_one_magnon, label=r'')
+# %% Plot chi^(0) and chi^(1) for three canting values
+# FIXME: chi_vacuum and chi_one_magnon must be computed above before enabling this block
+# with plt.style.context(['science', 'ieee']):
+#     fig = plt.figure(figsize=(4, 6))
+#     gs = fig.add_gridspec(2, hspace=0)
+#     axes = gs.subplots(sharex=True)
+#     for ax in axes:
+#         ax.set_box_aspect(0.75)
+#     plot_frequency_resolved_RCD(axes[0], w, chi_vacuum[1:4],     s_values[0:3], plot_length=3, color=colors_vacuum,     label=r'')
+#     plot_frequency_resolved_RCD(axes[1], w, chi_one_magnon[1:4], s_values[0:3], plot_length=3, color=colors_one_magnon, label=r'')
+#     axes[1].set_xlabel(r'$\hslash\omega/J$', fontsize=15)
+#     axes[0].set_ylabel(r'$\chi^{(0)}(\omega)$', fontsize=15)
+#     axes[1].set_ylabel(r'$\chi^{(1)}(\omega)$', fontsize=15)
+#     axes[0].legend(loc="lower left", fontsize=13)
+#     axes[1].legend(loc="lower left", fontsize=13)
+#     plt.show()
+#     # fig.savefig('figures/pump_probe/canted_TRCD_vacuum_one_magnon.png', dpi=300, bbox_inches='tight')
 
-    #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
-    #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
-    axes[1].set_xlabel(r'$\hslash\omega/J$', fontsize=15)
-    axes[0].set_ylabel(r'$\chi^{(0)}(\omega)$', fontsize=15)
-    axes[1].set_ylabel(r'$\chi^{(1)}(\omega)$', fontsize=15)
-    axes[0].legend(loc="lower left", fontsize=13)
-    axes[1].legend(loc="lower left", fontsize=13)
-    plt.show()
-    #fig.savefig('figures/pump_probe/frequency_resolved_RCD_vacuum_one_magnon.png', dpi=300, bbox_inches='tight')
-
-# %%
-with plt.style.context(['science','ieee']):
-    fig = plt.figure(figsize=(4,6))
-    gs = fig.add_gridspec(2, hspace=0)
-    axes = gs.subplots(sharex=True)
-
-    for ax in axes:
-        ax.set_box_aspect(0.75)
-    
-    plot_frequency_resolved_RCD(axes[0], w, normalize(chi_vacuum[1]), s_values[1], plot_length=1, color=colors_vacuum[-1], label=r'$\chi^{(0)}(\omega)$')
-    plot_frequency_resolved_RCD(axes[0], w, normalize(chi_one_magnon[1]), s_values[1], plot_length=1, color=colors_one_magnon[-1], label=r'$\chi^{(1)}(\omega)$')
-    plot_frequency_resolved_RCD(axes[0], w, normalize(dos_weighted_one_magnon[1]), s_values[1], ls='--', plot_length=1, color='grey', label=r'$\Lambda$')
-
-    plot_frequency_resolved_RCD(axes[1], w, normalize(chi_vacuum[3]), s_values[3], plot_length=1, color=colors_vacuum[-1], label=r'$\chi^{(0)}(\omega)$')
-    plot_frequency_resolved_RCD(axes[1], w, normalize(chi_one_magnon[3]), s_values[3], plot_length=1, color=colors_one_magnon[-1], label=r'$\chi^{(1)}(\omega)$')
-    plot_frequency_resolved_RCD(axes[1], w, normalize(dos_weighted_one_magnon[3]), s_values[3], ls='--', plot_length=1, color='black', label=r'$\Lambda^\prime$')
-    #plt.axvline(w[np.argmax(chi_two_magnons_upper[1])])
-    #plt.axvline(w[np.argmin(chi_two_magnons_lower[1])])
-    axes[1].set_xlabel(r'$\hslash\omega/J$', fontsize=15)
-    axes[0].set_ylabel(r'', fontsize=15)
-    axes[1].set_ylabel(r'', fontsize=15)
-    axes[0].legend(loc="lower left", fontsize=13)
-    axes[1].legend(loc="lower left", fontsize=13)
-    plt.show()
-    #fig.savefig('figures/pump_probe/frequency_resolved_RCD_vacuum_2dos.png', dpi=300, bbox_inches='tight')
-# %%
-
-
-#%% distance and gap
-gap = np.array([np.min(energy_array[i][0]-energy_array[i][1]) for i in range(4)])
-gap[1] = energy_array[1][0][67,123]-energy_array[1][1][67,123]
-gap[2] = energy_array[2][0][67,123]-energy_array[2][1][67,123]
-gap[3] = energy_array[3][0][67,123]-energy_array[3][1][67,123]
-gap = np.append(gap, (energy_array[4][0][67,123]-energy_array[4][1][67,123]))
-
-fm_peak = np.array([w[np.argmax(chi_FM_upper[i])] for i in range(5)])
-fm_peak[1] = w[np.argmin(chi_FM_upper[1])]
-
-distance = np.array([(w[np.argmax(chi_two_magnons_upper[i])]-w[np.argmin(chi_two_magnons_lower[i])])/2 for i in range(5)])
-
-with plt.style.context(['science','ieee']):
-    fig, ax = plt.subplots(figsize=(4,3))
-
-    #ax.plot([0,0.25,0.5,0.75],distance, '-o', color='#b5b5b8', label='distance')
-    ax.plot([0,0.25,0.5,0.75, 1], gap , '-o', color='#b5b5b8', label=r'$\Delta_g$')
-    ax.plot([0,0.25,0.5,0.75, 1], distance , '-o', color='#0071bc', label=r'$\Delta_{\text{RCD}}$')
-    ax.plot([0,0.25,0.5,0.75, 1], fm_peak , '-o', color='#ff5050', label=r'$\xi_{\text{FM}}$')
-   
-    ax.set_ylabel(r'$\hslash\omega/J$', fontsize=12)
-    ax.set_xlabel(r'$B/B_s$', fontsize=12)
-    ax.set_xticks([0,0.25,0.5,0.75, 1])
-    ax.legend(fontsize=12)
-    plt.show()
-    #fig.savefig('figures/pump_probe/gap_distance_fm_peak.png', dpi=300, bbox_inches='tight')
-
-
-
-# %%
-honeycomb_bz_x, honeycomb_bz_y = honeycomb_bz()
-
-kx,ky = bzmesh(m=2)
-
-color_bar_title_RL_upper = [r"$|t_{{\alpha}^{\prime}\bar{\alpha}^{\prime}}^{RL}|^2$",
-                            r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
-                            r"$|t_{{\alpha}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",] # 2M, FM, AFM
-
-color_bar_title_RL_lower = [r"$|t_{{\beta}^{\prime}\bar{\beta}^{\prime}}^{RL}|^2$",
-                            r"$|t_{\bar{\beta}^{\prime}\bar{\alpha}}^{RL}|^2$",
-                            r"$|t_{{\beta}^{\prime}\bar{\alpha}^{\prime}^{RL}|^2$",] 
-
-pads = [7, 2, 0]
-
-with plt.style.context(['science','ieee']):
-    fig, axes = panel(figsize=(12,3), nrows=1, ncols=3, width_ratios=[1, 1, 1], height_ratios=[1], hspace=0.1, wspace=0.25)
-
-    fig.subplots_adjust(top=0.95, bottom=0.15, right=0.99)
-
-    for i in range(3):
-        pc = axes[i].pcolormesh(kx, ky, cross_section_array[i], cmap="jet")
-        
-        plot(honeycomb_bz_x, honeycomb_bz_y, ax=axes[i], linestyle='-', linewidth=1, color='k')
-
-        clb = fig.colorbar(pc, ax=axes[i], shrink=0.9)
-        clb.ax.set_title(r'$\chi_{\bf k}$', loc='left', fontsize=16, pad=pads[i])
-        clb.ax.tick_params(labelsize=16)
-
-        axes[i].set_axis_on() # make sure the axis is on
-        axes[i].grid(False) # make sure the grid is off
-
-        axes[i].set_xticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_xticklabels(['-1', '0', '1'], fontsize=16)
-        axes[i].set_yticks([-0.5 * 2 * np.pi, 0, 0.5 * 2 * np.pi])
-        axes[i].set_yticklabels(['-1', '0', '1'], fontsize=16)
-
-        axes[i].set_xlabel(r'$k_x(\pi/a)$', fontsize=18)
-        axes[i].set_ylabel(r'$k_y(\pi/a)$', fontsize=18)
-    plt.show()
+# %% Normalised chi^(0), chi^(1), weighted DOS at two canting values
+# FIXME: requires chi_vacuum, chi_one_magnon, dos_weighted_one_magnon defined above
+# with plt.style.context(['science', 'ieee']):
+#     fig = plt.figure(figsize=(4, 6))
+#     gs = fig.add_gridspec(2, hspace=0)
+#     axes = gs.subplots(sharex=True)
+#     for ax in axes:
+#         ax.set_box_aspect(0.75)
+#     plot_frequency_resolved_RCD(axes[0], w, normalize(chi_vacuum[1]),           s_values[1], plot_length=1, color=colors_vacuum[-1],     label=r'$\chi^{(0)}(\omega)$')
+#     plot_frequency_resolved_RCD(axes[0], w, normalize(chi_one_magnon[1]),       s_values[1], plot_length=1, color=colors_one_magnon[-1], label=r'$\chi^{(1)}(\omega)$')
+#     plot_frequency_resolved_RCD(axes[0], w, normalize(dos_weighted_one_magnon[1]), s_values[1], ls='--', plot_length=1, color='grey',    label=r'$\Lambda$')
+#     plot_frequency_resolved_RCD(axes[1], w, normalize(chi_vacuum[3]),           s_values[3], plot_length=1, color=colors_vacuum[-1],     label=r'$\chi^{(0)}(\omega)$')
+#     plot_frequency_resolved_RCD(axes[1], w, normalize(chi_one_magnon[3]),       s_values[3], plot_length=1, color=colors_one_magnon[-1], label=r'$\chi^{(1)}(\omega)$')
+#     plot_frequency_resolved_RCD(axes[1], w, normalize(dos_weighted_one_magnon[3]), s_values[3], ls='--', plot_length=1, color='black',   label=r'$\Lambda^\prime$')
+#     axes[1].set_xlabel(r'$\hslash\omega/J$', fontsize=15)
+#     axes[0].set_ylabel(r'', fontsize=15)
+#     axes[1].set_ylabel(r'', fontsize=15)
+#     axes[0].legend(loc="lower left", fontsize=13)
+#     axes[1].legend(loc="lower left", fontsize=13)
+#     plt.show()
+#     # fig.savefig('figures/pump_probe/canted_TRCD_vacuum_2dos.png', dpi=300, bbox_inches='tight')
 # %%

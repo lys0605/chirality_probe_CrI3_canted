@@ -46,7 +46,7 @@ This repository contains the Python source code accompanying the manuscript on c
 |--------|-------------|-------------|
 | **CrI₃** | Ferromagnetic honeycomb van der Waals insulator | `CrI3/` |
 | **Canted AFM** | Canted antiferromagnet on honeycomb lattice | `canted/` |
-| **Pump–probe / finite-T** | Time-resolved and finite-temperature RCD | `canted/pump_probe.py`, `canted/finite_temperature_pump_probe.py` |
+| **Pump–probe / finite-T** | Time-resolved and finite-temperature RCD | `canted/pump_probe.py`, `canted/finite_temperature_pump_probe.py` *(in development)* |
 
 ---
 
@@ -116,7 +116,7 @@ chirality-probe/
 │   ├── canted_RCD.py              # RCD amplitudes (exact & LMC methods)
 │   ├── canted_raman_cross_section.py  # Raman cross-section on BZ mesh
 │   ├── pump_probe.py              # T = 0 frequency-resolved RCD
-│   └── finite_temperature_pump_probe.py   # Finite-T RCD χ(ω, T)
+│   └── finite_temperature_pump_probe.py   # Finite-T RCD χ(ω, T)  [in development]
 │
 ├── figures/                       # Output figures (auto-generated)
 ├── LICENSE
@@ -175,7 +175,7 @@ python common/panel_plot.py
 | Chern number | *C* | `canted/canted_chern_number.py` |
 | Raman cross-section | σ(**k**) | `CrI3/CrI3_raman_scattering.py`, `canted/canted_raman_cross_section.py` |
 | RCD spectrum | χ(ω) | `canted/canted_RCD.py`, `canted/pump_probe.py` |
-| Finite-T RCD | χ(ω, T) | `CrI3/CrI3_pump_probe.py`, `canted/finite_temperature_pump_probe.py` |
+| Finite-T RCD | χ(ω, T) | `CrI3/CrI3_pump_probe.py`, `canted/finite_temperature_pump_probe.py` *(in development)* |
 
 ---
 
@@ -202,21 +202,24 @@ CANTED_AFM = dict(J=1.0, D=0.1, S=5/2)
 
 ```
 common/
-  model_parameters.py   ← material & physical constants
+  model_parameters.py        ← material & physical constants (CrI₃, canted AFM)
         ↑
-  bose_statistics.py    ← Bose–Einstein / Boltzmann weights
+  bose_statistics.py         ← Bose–Einstein / Boltzmann weights
         ↑
-  honeycomb_lattice.py   math_utils.py   plot_utils.py
-           ↑                  ↑                ↑
-           └──────────────────┴────────────────┘
+  honeycomb_lattice.py   math_utils.py   plot_utils.py   panel_plot.py
+           ↑                  ↑                ↑                ↑
+           └──────────────────┴────────────────┴────────────────┘
                               ↑
-                        CrI3/CrI3_model.py    ← shared CrI3 Hamiltonian
-                              ↑
-                    ┌─────────┴──────────┐
-              CrI3/ scripts        canted/ scripts
-                                   pump_probe.py
-                                   finite_temperature_pump_probe.py
-                          common/panel_plot.py
+               ┌──────────────┴──────────────┐
+               │                             │
+      CrI3/CrI3_model.py             canted/ scripts
+      (shared CrI3 Hamiltonian)       canted_energy_band.py
+               ↑                      canted_chern_number.py
+      ┌────────┴────────┐              canted_curvature.py
+      │                 │              canted_RCD.py
+  CrI3_band.py    CrI3_curvature.py   canted_raman_cross_section.py
+  CrI3_raman_     CrI3_pump_probe.py  pump_probe.py
+  scattering.py                       finite_temperature_pump_probe.py  [in development]
 ```
 
 **`common/` module summary**
