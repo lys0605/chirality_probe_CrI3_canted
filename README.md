@@ -99,7 +99,8 @@ chirality-probe/
 │   ├── mathfuntion.py             # Backward-compat shim → re-exports math_utils
 │   ├── model_parameters.py        # Material & physical constants (CrI₃, canted AFM)
 │   ├── bose_statistics.py         # Bose–Einstein and Boltzmann statistics
-│   └── plot_utils.py              # Plotting helpers and panel builders
+│   ├── plot_utils.py              # Plotting helpers and panel builders
+│   └── panel_plot.py              # Assemble multi-panel publication figures
 │
 ├── CrI3/                          # CrI₃ ferromagnet scripts
 │   ├── CrI3_model.py              # Bond-vector constants + FM_eigs_exact eigensolver
@@ -116,8 +117,6 @@ chirality-probe/
 │   ├── canted_raman_cross_section.py  # Raman cross-section on BZ mesh
 │   ├── pump_probe.py              # T = 0 frequency-resolved RCD
 │   └── finite_temperature_pump_probe.py   # Finite-T RCD χ(ω, T)
-│
-├── common/panel_plot.py           # Assemble multi-panel publication figures
 │
 ├── figures/                       # Output figures (auto-generated)
 ├── LICENSE
