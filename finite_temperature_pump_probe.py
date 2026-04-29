@@ -2,13 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from plot_utils import (plot, letter_annotation, panel,
+from common.plot_utils import (plot, letter_annotation, panel,
                         plot_frequency_resolved_RCD,
                         plot_frequency_temperature_resolved_RCD)
-from math_utils import gaussian_function, lorentzian_function, normalize
-from thermal import bose_einstein, boltzmann_factor, occupation_function
-from honeycomb_lattice import *
-from canted_raman_cross_section import *
+from common.math_utils import gaussian_function, lorentzian_function, normalize
+from common.bose_statistics import bose_einstein, boltzmann_factor, occupation_function
+from common.honeycomb_lattice import *
+from canted.canted_raman_cross_section import *
 import scienceplots
 
 

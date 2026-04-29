@@ -1,12 +1,15 @@
 # %%
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from plot_utils import plot
-from CrI3_model import NN, NNN, NNNN
-from honeycomb_lattice import (get_kvectors, get_path, get_total_path,
-                                group_kvectors, GAMMA, K, K_PRIME, M_POINT)
-from parameters import CrI3
+from common.plot_utils import plot
+from CrI3.CrI3_model import NN, NNN, NNNN
+from common.honeycomb_lattice import (get_kvectors, get_path, get_total_path,
+                                      group_kvectors, GAMMA, K, K_PRIME, M_POINT)
+from common.model_parameters import CrI3
 import scienceplots
 
 mpl.rcParams['xtick.labelsize'] = 24

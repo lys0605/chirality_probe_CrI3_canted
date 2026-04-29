@@ -10,7 +10,7 @@ from labellines import labelLine, labelLines
 from scipy.signal import savgol_filter
 import math
 from PIL import Image
-from plot_utils import plot, letter_annotation, panel, panel_unequal
+from common.plot_utils import plot, letter_annotation, panel, panel_unequal
 import scienceplots
 # %%
 

@@ -1,10 +1,13 @@
 # %%
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy as np
 import matplotlib.pyplot as plt
-from plot_utils import plot, panel
-from CrI3_model import NN, NNN, NNNN, FM_eigs_exact
-from honeycomb_lattice import bzmesh, honeycomb_bz, bz_integration_honeycomb
-from parameters import CrI3
+from common.plot_utils import plot, panel
+from CrI3.CrI3_model import NN, NNN, NNNN, FM_eigs_exact
+from common.honeycomb_lattice import bzmesh, honeycomb_bz, bz_integration_honeycomb
+from common.model_parameters import CrI3
 import scienceplots
 
 

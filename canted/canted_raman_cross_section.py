@@ -1,10 +1,13 @@
 # %%
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from plot_utils import plot, letter_annotation, panel
-from mathfuntion import Im, Re, is_invertible
-from honeycomb_lattice import *
+from common.plot_utils import plot, letter_annotation, panel
+from common.math_utils import Im, Re, is_invertible
+from common.honeycomb_lattice import *
 import scienceplots
 # %%
 

@@ -2,11 +2,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from plot_utils import plot, letter_annotation, panel, plot_frequency_resolved_RCD
-from math_utils import gaussian_function, lorentzian_function, normalize
-from thermal import bose_einstein, boltzmann_factor
-from honeycomb_lattice import *
-from canted_raman_cross_section import *
+from common.plot_utils import plot, letter_annotation, panel, plot_frequency_resolved_RCD
+from common.math_utils import gaussian_function, lorentzian_function, normalize
+from common.bose_statistics import bose_einstein, boltzmann_factor
+from common.honeycomb_lattice import *
+from canted.canted_raman_cross_section import *
 import scienceplots
 # %%
 

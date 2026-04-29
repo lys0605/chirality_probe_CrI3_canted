@@ -1,6 +1,6 @@
 """
-thermal.py
-==========
+bose_statistics.py
+==================
 Temperature-dependent statistical functions for magnon calculations.
 
 All energies are assumed to be in **meV** and temperatures in **Kelvin**,
@@ -15,7 +15,7 @@ occupation_function 1 / (1 − boltzmann_factor)  (bosonic)
 """
 
 import numpy as np
-from parameters import k_B_meV
+from .model_parameters import k_B_meV
 
 # Expose the constant so callers can verify the unit convention
 k_B = k_B_meV   # meV / K

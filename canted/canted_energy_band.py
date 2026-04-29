@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from plot_utils import plot, letter_annotation, panel
-from math_utils import Im, Re, is_invertible
-from honeycomb_lattice import (get_kvectors, get_path, get_total_path,
+from common.plot_utils import plot, letter_annotation, panel
+from common.math_utils import Im, Re, is_invertible
+from common.honeycomb_lattice import (get_kvectors, get_path, get_total_path,
                                 group_kvectors, GAMMA, K, K_PRIME, M_POINT)
 import scienceplots
 
